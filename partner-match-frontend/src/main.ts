@@ -1,5 +1,6 @@
-import { createApp } from 'vue'
-import './style.css'
-import App from './App.vue'
+import 'vant/lib/index.css'
+// @ts-ignore
+import App from "./App.vue";
+import { createApp } from 'vue';
 
-createApp(App).mount('#app')
+createApp(App).mount('#app');
