@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: partner-match
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/partner_match?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=GMT%2B8
+    username: root
+    password: 123456
+
+server:
+  port: 8080
+  servlet:
+    # session 失效时间
+    session:
+      timeout: 86400
+    context-path: /api
+
+knife4j:
+  enable: true
+  openapi:
+    title: 伙伴匹配系统
+    description: 伙伴匹配系统接口文档
+    email: zyf19863@163.com
+    concat: zyf
+    url: https://github.com/zyf127
+    version: v4.0
+    group:
+      userTest:
+        group-name: 用户接口
+        api-rule: package
+        api-rule-resources:
+          - com.zyf.controller
