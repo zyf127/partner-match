@@ -32,12 +32,14 @@ create table user
     user_password varchar(512)                       not null comment '密码',
     phone         varchar(128)                       null comment '电话',
     email         varchar(512)                       null comment '邮箱',
+    profile       varchar(512)                       null comment '个人简介',
+    tag_names     varchar(1024)                      null comment '标签名称 json 列表',
     user_status   int      default 0                 not null comment '状态 0 - 正常',
     user_role     tinyint  default 0                 not null comment '角色 0 - 普通用户 1 - 管理员',
-    tag_names     varchar(1024)                      null comment '标签名称 json 列表',
     create_time   datetime default CURRENT_TIMESTAMP null comment '创建时间',
     update_time   datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment '更新时间',
     is_delete     tinyint  default 0                 not null comment '是否删除'
 )
     comment '用户';
+
 

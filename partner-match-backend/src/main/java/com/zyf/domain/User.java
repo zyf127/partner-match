@@ -55,6 +55,16 @@ public class User implements Serializable {
     private String email;
 
     /**
+     * 个人简介
+     */
+    private String profile;
+
+    /**
+     * 标签名称 json 列表
+     */
+    private String tagNames;
+
+    /**
      * 状态 0 - 正常
      */
     private Integer userStatus;
@@ -63,11 +73,6 @@ public class User implements Serializable {
      * 角色 0 - 普通用户 1 - 管理员
      */
     private Integer userRole;
-
-    /**
-     * 标签名称列表
-     */
-    private String tagNames;
 
     /**
      * 创建时间
@@ -108,9 +113,10 @@ public class User implements Serializable {
             && (this.getUserPassword() == null ? other.getUserPassword() == null : this.getUserPassword().equals(other.getUserPassword()))
             && (this.getPhone() == null ? other.getPhone() == null : this.getPhone().equals(other.getPhone()))
             && (this.getEmail() == null ? other.getEmail() == null : this.getEmail().equals(other.getEmail()))
+            && (this.getProfile() == null ? other.getProfile() == null : this.getProfile().equals(other.getProfile()))
+            && (this.getTagNames() == null ? other.getTagNames() == null : this.getTagNames().equals(other.getTagNames()))
             && (this.getUserStatus() == null ? other.getUserStatus() == null : this.getUserStatus().equals(other.getUserStatus()))
             && (this.getUserRole() == null ? other.getUserRole() == null : this.getUserRole().equals(other.getUserRole()))
-            && (this.getTagNames() == null ? other.getTagNames() == null : this.getTagNames().equals(other.getTagNames()))
             && (this.getCreateTime() == null ? other.getCreateTime() == null : this.getCreateTime().equals(other.getCreateTime()))
             && (this.getUpdateTime() == null ? other.getUpdateTime() == null : this.getUpdateTime().equals(other.getUpdateTime()))
             && (this.getIsDelete() == null ? other.getIsDelete() == null : this.getIsDelete().equals(other.getIsDelete()));
@@ -128,9 +134,10 @@ public class User implements Serializable {
         result = prime * result + ((getUserPassword() == null) ? 0 : getUserPassword().hashCode());
         result = prime * result + ((getPhone() == null) ? 0 : getPhone().hashCode());
         result = prime * result + ((getEmail() == null) ? 0 : getEmail().hashCode());
+        result = prime * result + ((getProfile() == null) ? 0 : getProfile().hashCode());
+        result = prime * result + ((getTagNames() == null) ? 0 : getTagNames().hashCode());
         result = prime * result + ((getUserStatus() == null) ? 0 : getUserStatus().hashCode());
         result = prime * result + ((getUserRole() == null) ? 0 : getUserRole().hashCode());
-        result = prime * result + ((getTagNames() == null) ? 0 : getTagNames().hashCode());
         result = prime * result + ((getCreateTime() == null) ? 0 : getCreateTime().hashCode());
         result = prime * result + ((getUpdateTime() == null) ? 0 : getUpdateTime().hashCode());
         result = prime * result + ((getIsDelete() == null) ? 0 : getIsDelete().hashCode());
@@ -151,9 +158,10 @@ public class User implements Serializable {
         sb.append(", userPassword=").append(userPassword);
         sb.append(", phone=").append(phone);
         sb.append(", email=").append(email);
+        sb.append(", profile=").append(profile);
+        sb.append(", tagNames=").append(tagNames);
         sb.append(", userStatus=").append(userStatus);
         sb.append(", userRole=").append(userRole);
-        sb.append(", tagNames=").append(tagNames);
         sb.append(", createTime=").append(createTime);
         sb.append(", updateTime=").append(updateTime);
         sb.append(", isDelete=").append(isDelete);

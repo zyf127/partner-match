@@ -9,8 +9,9 @@ export type UserType = {
     gender:number;
     phone: string;
     email: string;
+    profile: string;
+    tagNames: string[];
     userStatus: number;
     userRole: number;
-    tagNames: string[];
     createTime: Date;
 };
