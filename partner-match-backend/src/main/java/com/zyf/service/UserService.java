@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.zyf.domain.User;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
 * @author zyf
@@ -24,7 +25,7 @@ public interface UserService extends IService<User> {
      *
      * @param userAccount 账户
      * @param userPassword 密码
-     * @param request 记录登录态信息
+     * @param request
      * @return 脱敏后的用户信息
      */
     User userLogin(String userAccount, String userPassword, HttpServletRequest request);
@@ -44,4 +45,12 @@ public interface UserService extends IService<User> {
      * @return 脱敏后的用户信息
      */
     User getSafetyUser(User user);
+
+    /**
+     * 根据标签搜索用户
+     *
+     * @param tagNameList 标签名称列表
+     * @return 搜索到的用户
+     */
+    List<User> searchUsersByTagNames(List<String> tagNameList);
 }

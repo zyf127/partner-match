@@ -2,6 +2,8 @@ package com.zyf.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.zyf.common.ErrorCode;
 import com.zyf.domain.User;
 import com.zyf.exception.BusinessException;
@@ -10,12 +12,16 @@ import com.zyf.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static com.zyf.constant.UserConstant.USER_LOGIN_STATE;
 
@@ -37,6 +43,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      */
     private static final String SALT = "zyf";
 
+    /**
+     * 用户注册
+     *
+     * @param userAccount 账号
+     * @param userPassword 密码
+     * @param checkPassword 检验密码
+     * @return 新用户 id
+     */
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword) {
         // 1. 校验
@@ -78,6 +92,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return user.getId();
     }
 
+    /**
+     * 用户登录
+     *
+     * @param userAccount 账户
+     * @param userPassword 密码
+     * @param request
+     * @return 脱敏后的用户信息
+     */
     @Override
     public User userLogin(String userAccount, String userPassword, HttpServletRequest request) {
         // 1.检验账户和密码是否合法
@@ -115,12 +137,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return safetyUser;
     }
 
+    /**
+     * 用户注销
+     *
+     * @param request
+     * @return
+     */
     @Override
     public int userLogout(HttpServletRequest request) {
         request.removeAttribute(USER_LOGIN_STATE);
         return 1;
     }
 
+    /**
+     * 用户脱敏
+     *
+     * @param user 脱敏前的用户信息
+     * @return 脱敏后的用户信息
+     */
     public User getSafetyUser(User user) {
         if (user == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "脱敏前的用户信息为空");
@@ -138,6 +172,55 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         safetyUser.setTagNames(user.getTagNames());
         safetyUser.setCreateTime(user.getCreateTime());
         return safetyUser;
+    }
+
+    /**
+     * 根据标签名称搜索用户（内存过滤版）
+     *
+     * @param tagNameList 标签名称列表
+     * @return 搜索到的用户
+     */
+    @Override
+    public List<User> searchUsersByTagNames(List<String> tagNameList) {
+        if (CollectionUtils.isEmpty(tagNameList)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        // 先查出所有数据，之后在内存中进行过滤
+        List<User> userList = this.list();
+        return userList.stream().filter((user) -> {
+            String tagNameStr = user.getTagNames();
+            if (StringUtils.isBlank(tagNameStr)) {
+                return false;
+            }
+            Gson gson = new Gson();
+            Set<String> tagNameSet = gson.fromJson(tagNameStr, new TypeToken<Set<String>>(){}.getType());
+            for (String tagName : tagNameList) {
+                if (!tagNameSet.contains(tagName)) {
+                    return false;
+                }
+            }
+            return true;
+        }).map(this::getSafetyUser).collect(Collectors.toList());
+    }
+
+    /**
+     * 根据标签名称搜索用户（SQL 查询版）
+     *
+     * @param tagNameList 标签名称列表
+     * @return 搜索到的用户
+     */
+    @Deprecated
+    private List<User> searchUsersByTagNamesBySQL(List<String> tagNameList) {
+        if (CollectionUtils.isEmpty(tagNameList)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        // 在数据库中进行条件查询
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        for (String tagName : tagNameList) {
+            queryWrapper.like("tag_names", tagName);
+        }
+        List<User> userList = this.list(queryWrapper);
+        return userList.stream().map(this::getSafetyUser).collect(Collectors.toList());
     }
 }
 
