@@ -12,6 +12,7 @@ import com.zyf.domain.request.UserRegisterRequest;
 import com.zyf.exception.BusinessException;
 import com.zyf.service.UserService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -130,6 +131,21 @@ public class UserController {
         }
         List<User> userList = userService.list(queryWrapper);
         userList.stream().map((user) -> userService.getSafetyUser(user)).collect(Collectors.toList());
+        return ResultUtils.success(userList);
+    }
+
+    /**
+     * 根据标签名称搜索用户接口
+     *
+     * @param tagNameList 标签名称集合
+     * @return 搜索到的用户集合
+     */
+    @GetMapping("/search/tagNames")
+    public BaseResponse<List<User>> searchUsersByTagNames(@RequestParam(required = false) List<String> tagNameList) {
+        if (CollectionUtils.isEmpty(tagNameList)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        List<User> userList = userService.searchUsersByTagNames(tagNameList);
         return ResultUtils.success(userList);
     }
 
