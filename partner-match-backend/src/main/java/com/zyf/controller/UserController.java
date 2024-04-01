@@ -30,6 +30,7 @@ import static com.zyf.constant.UserConstant.USER_LOGIN_STATE;
  */
 @RestController
 @RequestMapping("/user")
+@CrossOrigin(origins = {"http://localhost:5173"})
 public class UserController {
     /**
      * 用户服务

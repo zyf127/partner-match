@@ -38,10 +38,10 @@
   const activeIndex = ref(0);
   const originTagNameList = [
     {
-      text: '性别',
+      text: '编程语言',
       children: [
-        { text: '男', id: '男' },
-        { text: '女', id: '女' },
+        { text: 'Java', id: 'Java' },
+        { text: 'C++', id: 'C++' },
       ],
     },
     {
@@ -51,13 +51,6 @@
         { text: '大二', id: '大二' },
         { text: '大三', id: '大三' },
         { text: '大四', id: '大四' },
-        { text: '大五', id: '大五' },
-        { text: '大六', id: '大六' },
-        { text: '大七', id: '大七' },
-        { text: '大八', id: '大八' },
-        { text: '大九', id: '大九' },
-        { text: '大十', id: '大十' },
-        { text: '大十一', id: '大十一' },
       ],
     },
   ];
