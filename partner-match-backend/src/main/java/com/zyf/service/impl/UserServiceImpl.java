@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.List;
@@ -42,6 +43,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      * 盐值，混淆密码
      */
     private static final String SALT = "zyf";
+
+    /**
+     * 用户 Mapper
+     */
+    @Resource
+    private UserMapper userMapper;
 
     /**
      * 用户注册
@@ -75,7 +82,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         // 账号不能重复
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_account", userAccount);
-        int count = this.count(queryWrapper);
+        int count = userMapper.selectCount(queryWrapper);
         if (count > 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户账号重复");
         }
@@ -85,8 +92,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         User user = new User();
         user.setUserAccount(userAccount);
         user.setUserPassword(encryptPassword);
-        boolean saveResult = this.save(user);
-        if (!saveResult) {
+        int saveResult = userMapper.insert(user);
+        if (saveResult != 1) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "注册用户失败");
         }
         return user.getId();
@@ -123,7 +130,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_account", userAccount);
         queryWrapper.eq("user_password", encryptPassword);
-        User user = this.getOne(queryWrapper);
+        User user = userMapper.selectOne(queryWrapper);
         if (user == null) {
             log.info("user login failed, userAccount cannot match userPassword");
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号和密码不匹配");
@@ -187,7 +194,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // 先查出所有数据，之后在内存中进行过滤
-        List<User> userList = this.list();
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        List<User> userList = userMapper.selectList(queryWrapper);
         return userList.stream().filter((user) -> {
             String tagNameStr = user.getTagNames();
             if (StringUtils.isBlank(tagNameStr)) {
@@ -202,6 +210,39 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             }
             return true;
         }).map(this::getSafetyUser).collect(Collectors.toList());
+    }
+
+    /**
+     * 用户修改
+     *
+     * @param user 用户信息
+     * @param request
+     * @return 是否修改成功
+     */
+    @Override
+    public int updateUser(User user, HttpServletRequest request) {
+        // 检验要修改的用户
+        if (user == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Long userId = user.getId();
+        // 获取登录态中的用户
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        User loginUser = (User)userObj;
+        // 是否登录
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        // 登录的用户和修改的用户是否一致
+        if (userId != loginUser.getId()) {
+            throw new BusinessException(ErrorCode.NO_AUTH);
+        }
+        // 获取修改前的用户
+        User oldUser = userMapper.selectById(userId);
+        if (oldUser == null) {
+            throw new BusinessException(ErrorCode.NULL_ERROR);
+        }
+        return userMapper.updateById(user);
     }
 
     /**
@@ -220,7 +261,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         for (String tagName : tagNameList) {
             queryWrapper.like("tag_names", tagName);
         }
-        List<User> userList = this.list(queryWrapper);
+        List<User> userList = userMapper.selectList(queryWrapper);
         return userList.stream().map(this::getSafetyUser).collect(Collectors.toList());
     }
 }

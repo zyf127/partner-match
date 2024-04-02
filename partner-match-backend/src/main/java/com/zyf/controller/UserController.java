@@ -88,9 +88,6 @@ public class UserController {
      */
     @PostMapping("/logout")
     public BaseResponse<Integer> userLogout(HttpServletRequest request) {
-        if (request == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
         int result = this.userService.userLogout(request);
         return ResultUtils.success(result);
     }
@@ -167,6 +164,22 @@ public class UserController {
         }
         boolean result = userService.removeById(id);
         return ResultUtils.success(result);
+    }
+
+    /**
+     * 用户修改接口
+     *
+     * @param user 用户信息
+     * @param request
+     * @return 是否修改成功
+     */
+    @PostMapping("/update")
+    public BaseResponse<Integer> updateUser(@RequestBody User user, HttpServletRequest request) {
+        if (user == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        int updateResult = userService.updateUser(user, request);
+        return ResultUtils.success(updateResult);
     }
 
     /**

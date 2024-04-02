@@ -53,4 +53,13 @@ public interface UserService extends IService<User> {
      * @return 搜索到的用户
      */
     List<User> searchUsersByTagNames(List<String> tagNameList);
+
+    /**
+     * 用户修改
+     *
+     * @param user 用户信息
+     * @param request
+     * @return 是否修改成功
+     */
+    int updateUser(User user, HttpServletRequest request);
 }
