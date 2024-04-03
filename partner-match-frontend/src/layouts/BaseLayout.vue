@@ -9,7 +9,9 @@
       <van-icon name="search" size="18" />
     </template>
   </van-nav-bar>
-  <router-view />
+  <div id="content">
+    <router-view />
+  </div>
   <van-tabbar @change="onChange">
     <van-tabbar-item replace to="/" icon="home-o" name="index">首页</van-tabbar-item>
     <van-tabbar-item replace to="/team" icon="search" name="team">组队</van-tabbar-item>
@@ -28,5 +30,7 @@
 </script>
 
 <style scoped>
-
+  #content {
+    padding-bottom: 55px;
+  }
 </style>

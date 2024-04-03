@@ -30,7 +30,7 @@ import static com.zyf.constant.UserConstant.USER_LOGIN_STATE;
  */
 @RestController
 @RequestMapping("/user")
-@CrossOrigin(origins = {"http://localhost:5173"})
+@CrossOrigin(origins = {"http://localhost:5173"}, allowCredentials = "true")
 public class UserController {
     /**
      * 用户服务
@@ -128,8 +128,8 @@ public class UserController {
             queryWrapper.like("username", username);
         }
         List<User> userList = userService.list(queryWrapper);
-        userList.stream().map((user) -> userService.getSafetyUser(user)).collect(Collectors.toList());
-        return ResultUtils.success(userList);
+        List<User> safetyUserList = userList.stream().map((user) -> userService.getSafetyUser(user)).collect(Collectors.toList());
+        return ResultUtils.success(safetyUserList);
     }
 
     /**
@@ -145,6 +145,13 @@ public class UserController {
         }
         List<User> userList = userService.searchUsersByTagNames(tagNameList);
         return ResultUtils.success(userList);
+    }
+
+    @GetMapping("/recommend")
+    public BaseResponse<List<User>> recommendUsers(HttpServletRequest request) {
+        List<User> userList = userService.list();
+        List<User> safetyUserList = userList.stream().map((user) -> userService.getSafetyUser(user)).collect(Collectors.toList());
+        return ResultUtils.success(safetyUserList);
     }
 
     /**

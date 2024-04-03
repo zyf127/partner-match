@@ -225,7 +225,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (user == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        Long userId = user.getId();
+        // TODO 补充校验，如果用户没有传任何要更新的值，就直接报错，不用执行 update 语句
+        long userId = user.getId();
         // 获取登录态中的用户
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
         User loginUser = (User)userObj;
@@ -233,8 +234,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (loginUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN);
         }
+        long loginUserId = loginUser.getId();
         // 登录的用户和修改的用户是否一致
-        if (userId != loginUser.getId()) {
+        if (userId != loginUserId) {
             throw new BusinessException(ErrorCode.NO_AUTH);
         }
         // 获取修改前的用户

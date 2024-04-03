@@ -9,6 +9,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    UserCardList: typeof import('./src/components/UserCardList.vue')['default']
     VanButton: typeof import('vant/es')['Button']
     VanCard: typeof import('vant/es')['Card']
     VanCell: typeof import('vant/es')['Cell']
@@ -20,11 +21,15 @@ declare module 'vue' {
     VanForm: typeof import('vant/es')['Form']
     VanIcon: typeof import('vant/es')['Icon']
     VanNavBar: typeof import('vant/es')['NavBar']
+    VanRadio: typeof import('vant/es')['Radio']
+    VanRadioGroup: typeof import('vant/es')['RadioGroup']
     VanRow: typeof import('vant/es')['Row']
     VanSearch: typeof import('vant/es')['Search']
+    VanSkeletonTitle: typeof import('vant/es')['SkeletonTitle']
     VanTabbar: typeof import('vant/es')['Tabbar']
     VanTabbarItem: typeof import('vant/es')['TabbarItem']
     VanTag: typeof import('vant/es')['Tag']
+    VanTitle: typeof import('vant/es')['Title']
     VanTreeSelect: typeof import('vant/es')['TreeSelect']
   }
 }

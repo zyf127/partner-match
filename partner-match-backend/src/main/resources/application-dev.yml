@@ -19,6 +19,8 @@ server:
     # session 失效时间
     session:
       timeout: 86400
+      cookie:
+        domain: localhost
     context-path: /api
 
 knife4j:
