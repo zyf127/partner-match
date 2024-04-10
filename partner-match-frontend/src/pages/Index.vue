@@ -12,7 +12,12 @@ import UserCardList from "../components/UserCardList.vue";
 let userList = ref([]);
 
 onMounted(async () => {
-  const userListData = await myAxios.get('/user/recommend', {})
+  const userListData = await myAxios.get('/user/recommend', {
+    params: {
+      pageSize: 8,
+      pageNum: 1
+    }
+  })
       .then(function (response) {
         // 处理成功情况
         console.log('/user/search/tagNames success', response);
