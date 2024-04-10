@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zyf.domain.User;
 import com.zyf.service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -23,6 +25,9 @@ public class PreCacheJob {
     @Resource
     private UserService userService;
 
+    @Resource
+    private RedissonClient redissonClient;
+
     // 重点用户
     private List<Long> mainUserList = Arrays.asList(6L);
 
@@ -31,16 +36,28 @@ public class PreCacheJob {
      */
     @Scheduled(cron = "0 37 16 * * *")
     public void doCacheRecommendUsers() {
-        for (Long userId : mainUserList) {
-            Page<User> userPage = userService.page(new Page<>(1, 8));
-            String redisKey = String.format("partner-match:user:recommend:%s", userId);
-            ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
-            try {
-                valueOperations.set(redisKey, userPage, 30000, TimeUnit.MILLISECONDS);
-            } catch (Exception e) {
-                log.error("redis set key error");
+        RLock rLock = redissonClient.getLock("partner-match:precachejob:docache:lock");
+        try {
+            // 只有一个线程能获取到锁
+            if (rLock.tryLock(0, 30000L, TimeUnit.MILLISECONDS)) {
+                for (Long userId : mainUserList) {
+                    Page<User> userPage = userService.page(new Page<>(1, 8));
+                    String redisKey = String.format("partner-match:user:recommend:%s", userId);
+                    ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
+                    try {
+                        valueOperations.set(redisKey, userPage, 30000, TimeUnit.MILLISECONDS);
+                    } catch (Exception e) {
+                        log.error("redis set key error");
+                    }
+                }
+            }
+        } catch (InterruptedException e) {
+            log.error("doCacheRecommendUsers error", e);
+        } finally {
+            // 只能释放自己的锁
+            if (rLock.isHeldByCurrentThread()) {
+                rLock.unlock();
             }
         }
-
     }
 }
