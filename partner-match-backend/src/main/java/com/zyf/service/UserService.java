@@ -39,6 +39,14 @@ public interface UserService extends IService<User> {
     int userLogout(HttpServletRequest request);
 
     /**
+     * 获取当前用户登录态
+     *
+     * @param request
+     * @return 当前用户信息
+     */
+    User getCurrentUser(HttpServletRequest request);
+
+    /**
      * 用户脱敏
      *
      * @param user 脱敏前的用户信息
@@ -62,4 +70,14 @@ public interface UserService extends IService<User> {
      * @return 是否修改成功
      */
     int updateUser(User user, HttpServletRequest request);
+
+    /**
+     * 推荐用户
+     *
+     * @param pageSize 页面大小
+     * @param pageNum 页号
+     * @param request
+     * @return 推荐的用户
+     */
+    List<User> recommendUsers(long pageSize, long pageNum, HttpServletRequest request);
 }

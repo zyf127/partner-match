@@ -2,6 +2,7 @@ package com.zyf.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zyf.common.BaseResponse;
 import com.zyf.common.ErrorCode;
 import com.zyf.common.ResultUtils;
@@ -100,14 +101,7 @@ public class UserController {
      */
     @GetMapping("/current")
     public BaseResponse<User> getCurrentUser(HttpServletRequest request) {
-        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User currentUser = (User)userObj;
-        if (currentUser == null) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN);
-        }
-        long userId = currentUser.getId();
-        User user = this.userService.getById(userId);
-        User safetyUser = userService.getSafetyUser(user);
+        User safetyUser = userService.getCurrentUser(request);
         return ResultUtils.success(safetyUser);
     }
 
@@ -147,10 +141,17 @@ public class UserController {
         return ResultUtils.success(userList);
     }
 
+    /**
+     * 推荐用户接口
+     *
+     * @param pageSize 页面大小
+     * @param pageNum 页号
+     * @param request
+     * @return 推荐的用户
+     */
     @GetMapping("/recommend")
-    public BaseResponse<List<User>> recommendUsers(HttpServletRequest request) {
-        List<User> userList = userService.list();
-        List<User> safetyUserList = userList.stream().map((user) -> userService.getSafetyUser(user)).collect(Collectors.toList());
+    public BaseResponse<List<User>> recommendUsers(long pageSize, long pageNum, HttpServletRequest request) {
+        List<User> safetyUserList = userService.recommendUsers(pageSize, pageNum, request);
         return ResultUtils.success(safetyUserList);
     }
 

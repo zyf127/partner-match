@@ -1,16 +1,20 @@
 package com.zyf.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.zyf.common.ErrorCode;
+import com.zyf.common.ResultUtils;
 import com.zyf.domain.User;
 import com.zyf.exception.BusinessException;
 import com.zyf.mapper.UserMapper;
 import com.zyf.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
@@ -18,8 +22,10 @@ import org.springframework.util.DigestUtils;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.xml.transform.Result;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -49,6 +55,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      */
     @Resource
     private UserMapper userMapper;
+
+    /**
+     * 操作 Redis 缓存
+     */
+    @Resource
+    private RedisTemplate redisTemplate;
 
     /**
      * 用户注册
@@ -157,6 +169,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     /**
+     * 获取当前用户登录态
+     *
+     * @param request
+     * @return 当前用户信息
+     */
+    @Override
+    public User getCurrentUser(HttpServletRequest request) {
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        User currentUser = (User)userObj;
+        if (currentUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        long userId = currentUser.getId();
+        User user = userMapper.selectById(userId);
+        User safetyUser = this.getSafetyUser(user);
+        return safetyUser;
+    }
+
+    /**
      * 用户脱敏
      *
      * @param user 脱敏前的用户信息
@@ -245,6 +276,35 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             throw new BusinessException(ErrorCode.NULL_ERROR);
         }
         return userMapper.updateById(user);
+    }
+
+    /**
+     * 推荐用户
+     *
+     * @param pageSize 页面大小
+     * @param pageNum 页号
+     * @param request
+     * @return 推荐的用户
+     */
+    @Override
+    public List<User> recommendUsers(long pageSize, long pageNum, HttpServletRequest request) {
+        User loginUser = this.getCurrentUser(request);
+        String redisKey = String.format("partner-match:user:recommend:%s", loginUser.getId());
+        ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
+        // 如果有缓存，直接读缓存
+        Page<User> userPage = (Page<User>) valueOperations.get(redisKey);
+        if (userPage == null) {
+           // 如果没有缓存，查数据库
+            userPage = this.page(new Page<>(pageNum, pageSize));
+
+            try {
+                valueOperations.set(redisKey, userPage, 30000, TimeUnit.MILLISECONDS);
+            } catch (Exception e) {
+                log.error("redis set key error");
+            }
+        }
+        List<User> userList = userPage.getRecords();
+        return userList.stream().map((user) -> this.getSafetyUser(user)).collect(Collectors.toList());
     }
 
     /**
