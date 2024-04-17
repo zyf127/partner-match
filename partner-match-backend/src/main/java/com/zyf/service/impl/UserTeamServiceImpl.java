@@ -7,6 +7,8 @@ import com.zyf.mapper.UserTeamMapper;
 import org.springframework.stereotype.Service;
 
 /**
+ * 用户队伍关系服务
+ *
 * @author zyf
 */
 @Service
