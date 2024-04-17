@@ -2,14 +2,13 @@ package com.zyf.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zyf.common.BaseResponse;
 import com.zyf.common.ErrorCode;
 import com.zyf.common.ResultUtils;
 import com.zyf.constant.UserConstant;
-import com.zyf.domain.User;
-import com.zyf.domain.request.UserLoginRequest;
-import com.zyf.domain.request.UserRegisterRequest;
+import com.zyf.model.domain.User;
+import com.zyf.model.request.UserLoginRequest;
+import com.zyf.model.request.UserRegisterRequest;
 import com.zyf.exception.BusinessException;
 import com.zyf.service.UserService;
 import org.apache.commons.lang3.StringUtils;

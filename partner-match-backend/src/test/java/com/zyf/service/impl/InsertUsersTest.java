@@ -1,8 +1,6 @@
 package com.zyf.service.impl;
-import java.util.Comparator;
-import java.util.Date;
 
-import com.zyf.domain.User;
+import com.zyf.model.domain.User;
 import com.zyf.mapper.UserMapper;
 import com.zyf.service.UserService;
 import org.junit.jupiter.api.Test;

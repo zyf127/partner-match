@@ -1,6 +1,6 @@
 package com.zyf.service;
 
-import com.zyf.domain.Tag;
+import com.zyf.model.domain.Tag;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**

@@ -1,4 +1,4 @@
-package com.zyf.domain;
+package com.zyf.model.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
 

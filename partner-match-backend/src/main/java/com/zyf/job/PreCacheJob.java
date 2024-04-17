@@ -1,7 +1,7 @@
 package com.zyf.job;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.zyf.domain.User;
+import com.zyf.model.domain.User;
 import com.zyf.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
@@ -39,7 +39,7 @@ public class PreCacheJob {
         RLock rLock = redissonClient.getLock("partner-match:precachejob:docache:lock");
         try {
             // 只有一个线程能获取到锁
-            if (rLock.tryLock(0, 30000L, TimeUnit.MILLISECONDS)) {
+            if (rLock.tryLock(0, -1, TimeUnit.MILLISECONDS)) {
                 for (Long userId : mainUserList) {
                     Page<User> userPage = userService.page(new Page<>(1, 8));
                     String redisKey = String.format("partner-match:user:recommend:%s", userId);

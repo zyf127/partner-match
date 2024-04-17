@@ -1,4 +1,4 @@
-package com.zyf.domain.request;
+package com.zyf.model.request;
 
 import lombok.Data;
 

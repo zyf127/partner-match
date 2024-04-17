@@ -1,7 +1,7 @@
 package com.zyf.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zyf.domain.Tag;
+import com.zyf.model.domain.Tag;
 import com.zyf.service.TagService;
 import com.zyf.mapper.TagMapper;
 import org.springframework.stereotype.Service;

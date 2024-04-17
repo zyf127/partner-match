@@ -2,22 +2,21 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.zyf.mapper.TagMapper">
+<mapper namespace="com.zyf.mapper.UserTeamMapper">
 
-    <resultMap id="BaseResultMap" type="com.zyf.model.domain.Tag">
+    <resultMap id="BaseResultMap" type="com.zyf.model.domain.UserTeam">
             <id property="id" column="id" jdbcType="BIGINT"/>
-            <result property="tagName" column="tag_name" jdbcType="VARCHAR"/>
             <result property="userId" column="user_id" jdbcType="BIGINT"/>
-            <result property="parentId" column="parent_id" jdbcType="BIGINT"/>
-            <result property="isParent" column="is_parent" jdbcType="TINYINT"/>
+            <result property="teamId" column="team_id" jdbcType="BIGINT"/>
+            <result property="joinTime" column="join_time" jdbcType="TIMESTAMP"/>
             <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
             <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
             <result property="isDelete" column="is_delete" jdbcType="TINYINT"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,tag_name,user_id,
-        parent_id,is_parent,create_time,
-        update_time,is_delete
+        id,user_id,team_id,
+        join_time,create_time,update_time,
+        is_delete
     </sql>
 </mapper>

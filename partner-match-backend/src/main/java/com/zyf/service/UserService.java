@@ -1,7 +1,7 @@
 package com.zyf.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.zyf.domain.User;
+import com.zyf.model.domain.User;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;

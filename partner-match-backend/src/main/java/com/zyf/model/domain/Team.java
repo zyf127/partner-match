@@ -1,4 +1,4 @@
-package com.zyf.domain;
+package com.zyf.model.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
 
@@ -7,12 +7,12 @@ import java.util.Date;
 import lombok.Data;
 
 /**
- * 标签
- * @TableName tag
+ * 队伍
+ * @TableName team
  */
-@TableName(value ="tag")
+@TableName(value ="team")
 @Data
-public class Tag implements Serializable {
+public class Team implements Serializable {
     /**
      * id
      */
@@ -20,24 +20,39 @@ public class Tag implements Serializable {
     private Long id;
 
     /**
-     * 标签名称
+     * 队伍名称
      */
-    private String tagName;
+    private String teamName;
 
     /**
-     * 用户 id
+     * 描述
+     */
+    private String description;
+
+    /**
+     * 最大人数
+     */
+    private Integer maxNum;
+
+    /**
+     * 过期时间
+     */
+    private Date expireTime;
+
+    /**
+     * 用户id
      */
     private Long userId;
 
     /**
-     * 父标签 id
+     * 0 - 公开，1 - 私有，2 - 加密
      */
-    private Long parentId;
+    private Integer status;
 
     /**
-     * 0 - 不是，1 - 父标签
+     * 密码
      */
-    private Integer isParent;
+    private String password;
 
     /**
      * 创建时间
@@ -45,7 +60,7 @@ public class Tag implements Serializable {
     private Date createTime;
 
     /**
-     * 更新时间
+     * 
      */
     private Date updateTime;
 
@@ -69,12 +84,15 @@ public class Tag implements Serializable {
         if (getClass() != that.getClass()) {
             return false;
         }
-        Tag other = (Tag) that;
+        Team other = (Team) that;
         return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId()))
-            && (this.getTagName() == null ? other.getTagName() == null : this.getTagName().equals(other.getTagName()))
+            && (this.getTeamName() == null ? other.getTeamName() == null : this.getTeamName().equals(other.getTeamName()))
+            && (this.getDescription() == null ? other.getDescription() == null : this.getDescription().equals(other.getDescription()))
+            && (this.getMaxNum() == null ? other.getMaxNum() == null : this.getMaxNum().equals(other.getMaxNum()))
+            && (this.getExpireTime() == null ? other.getExpireTime() == null : this.getExpireTime().equals(other.getExpireTime()))
             && (this.getUserId() == null ? other.getUserId() == null : this.getUserId().equals(other.getUserId()))
-            && (this.getParentId() == null ? other.getParentId() == null : this.getParentId().equals(other.getParentId()))
-            && (this.getIsParent() == null ? other.getIsParent() == null : this.getIsParent().equals(other.getIsParent()))
+            && (this.getStatus() == null ? other.getStatus() == null : this.getStatus().equals(other.getStatus()))
+            && (this.getPassword() == null ? other.getPassword() == null : this.getPassword().equals(other.getPassword()))
             && (this.getCreateTime() == null ? other.getCreateTime() == null : this.getCreateTime().equals(other.getCreateTime()))
             && (this.getUpdateTime() == null ? other.getUpdateTime() == null : this.getUpdateTime().equals(other.getUpdateTime()))
             && (this.getIsDelete() == null ? other.getIsDelete() == null : this.getIsDelete().equals(other.getIsDelete()));
@@ -85,10 +103,13 @@ public class Tag implements Serializable {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((getId() == null) ? 0 : getId().hashCode());
-        result = prime * result + ((getTagName() == null) ? 0 : getTagName().hashCode());
+        result = prime * result + ((getTeamName() == null) ? 0 : getTeamName().hashCode());
+        result = prime * result + ((getDescription() == null) ? 0 : getDescription().hashCode());
+        result = prime * result + ((getMaxNum() == null) ? 0 : getMaxNum().hashCode());
+        result = prime * result + ((getExpireTime() == null) ? 0 : getExpireTime().hashCode());
         result = prime * result + ((getUserId() == null) ? 0 : getUserId().hashCode());
-        result = prime * result + ((getParentId() == null) ? 0 : getParentId().hashCode());
-        result = prime * result + ((getIsParent() == null) ? 0 : getIsParent().hashCode());
+        result = prime * result + ((getStatus() == null) ? 0 : getStatus().hashCode());
+        result = prime * result + ((getPassword() == null) ? 0 : getPassword().hashCode());
         result = prime * result + ((getCreateTime() == null) ? 0 : getCreateTime().hashCode());
         result = prime * result + ((getUpdateTime() == null) ? 0 : getUpdateTime().hashCode());
         result = prime * result + ((getIsDelete() == null) ? 0 : getIsDelete().hashCode());
@@ -102,10 +123,13 @@ public class Tag implements Serializable {
         sb.append(" [");
         sb.append("Hash = ").append(hashCode());
         sb.append(", id=").append(id);
-        sb.append(", tagName=").append(tagName);
+        sb.append(", teamName=").append(teamName);
+        sb.append(", description=").append(description);
+        sb.append(", maxNum=").append(maxNum);
+        sb.append(", expireTime=").append(expireTime);
         sb.append(", userId=").append(userId);
-        sb.append(", parentId=").append(parentId);
-        sb.append(", isParent=").append(isParent);
+        sb.append(", status=").append(status);
+        sb.append(", password=").append(password);
         sb.append(", createTime=").append(createTime);
         sb.append(", updateTime=").append(updateTime);
         sb.append(", isDelete=").append(isDelete);

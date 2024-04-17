@@ -1,7 +1,6 @@
 package com.zyf.spring;
-import java.util.Date;
 
-import com.zyf.domain.User;
+import com.zyf.model.domain.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
