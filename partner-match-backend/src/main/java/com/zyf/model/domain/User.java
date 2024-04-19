@@ -91,7 +91,7 @@ public class User implements Serializable {
     private Integer isDelete;
 
     @TableField(exist = false)
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -288535867021252852L;
 
     @Override
     public boolean equals(Object that) {

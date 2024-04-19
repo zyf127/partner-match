@@ -29,4 +29,24 @@
         tag_names,user_status,user_role,
         create_time,update_time,is_delete
     </sql>
+
+    <select id="selectUsersByTeamId" resultMap="BaseResultMap">
+        SELECT
+            u.id, u.username, u.user_account, u.avatar_url, u.gender, u.phone, u.email,
+            u.profile, u.tag_names, u.user_status, u.user_role, u.create_time, u.update_time
+        FROM
+            team t
+        INNER JOIN
+            user_team ut
+        ON
+            t.id = ut.team_id
+        INNER JOIN
+            user u
+        ON
+            u.id = ut.user_id
+        WHERE
+            t.id = #{teamId}
+        ORDER BY
+            ut.id ASC
+    </select>
 </mapper>

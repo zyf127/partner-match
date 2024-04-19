@@ -11,6 +11,8 @@ import com.zyf.model.dto.TeamQuery;
 import com.zyf.model.domain.Team;
 import com.zyf.exception.BusinessException;
 import com.zyf.model.request.TeamAddRequest;
+import com.zyf.model.request.TeamUpdateRequest;
+import com.zyf.model.vo.TeamUserVO;
 import com.zyf.service.TeamService;
 import com.zyf.service.UserService;
 import org.springframework.beans.BeanUtils;
@@ -80,17 +82,19 @@ public class TeamController {
     }
 
     /**
-     * 修改队伍接口
+     * 更新队伍接口
      *
-     * @param team 队伍信息
-     * @return 是否修改成功
+     * @param teamUpdateRequest 新的队伍信息
+     * @param request
+     * @return 是否更新成功
      */
     @PostMapping("/update")
-    public BaseResponse<Boolean> updateTeam(@RequestBody Team team) {
-        if (team == null) {
+    public BaseResponse<Boolean> updateTeam(@RequestBody TeamUpdateRequest teamUpdateRequest, HttpServletRequest request) {
+        if (teamUpdateRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        boolean result = teamService.updateById(team);
+        User loginUser = userService.getCurrentUser(request);
+        boolean result = teamService.updateTeam(teamUpdateRequest, loginUser);
         if (!result) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "修改失败");
         }
@@ -104,15 +108,12 @@ public class TeamController {
      * @return 匹配的队伍
      */
     @GetMapping("/list")
-    public BaseResponse<List<Team>> listTeams(TeamQuery teamQuery) {
+    public BaseResponse<List<TeamUserVO>> listTeams(TeamQuery teamQuery) {
         if (teamQuery == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        Team team = new Team();
-        BeanUtils.copyProperties(teamQuery, team);
-        QueryWrapper<Team> queryWrapper = new QueryWrapper<>(team);
-        List<Team> teamList = teamService.list(queryWrapper);
-        return ResultUtils.success(teamList);
+        List<TeamUserVO> teamUserVOList = teamService.listTeams(teamQuery);
+        return ResultUtils.success(teamUserVOList);
     }
 
     /**
@@ -128,7 +129,7 @@ public class TeamController {
         }
         Team team = new Team();
         BeanUtils.copyProperties(teamQuery, team);
-        Page<Team> page = new Page<Team>(teamQuery.getPageNum(), teamQuery.getPageSize());
+        Page<Team> page = new Page<>(teamQuery.getPageNum(), teamQuery.getPageSize());
         QueryWrapper<Team> queryWrapper = new QueryWrapper<>(team);
         Page<Team> teamPage = teamService.page(page, queryWrapper);
         List<Team> teamList = teamPage.getRecords();

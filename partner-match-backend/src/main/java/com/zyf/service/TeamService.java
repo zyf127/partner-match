@@ -3,6 +3,11 @@ package com.zyf.service;
 import com.zyf.model.domain.Team;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.zyf.model.domain.User;
+import com.zyf.model.dto.TeamQuery;
+import com.zyf.model.request.TeamUpdateRequest;
+import com.zyf.model.vo.TeamUserVO;
+
+import java.util.List;
 
 /**
 * @author zyf
@@ -16,4 +21,8 @@ public interface TeamService extends IService<Team> {
      * @return 队伍id
      */
     long addTeam(Team team, User loginUser);
+
+    List<TeamUserVO> listTeams(TeamQuery teamQuery);
+
+    boolean updateTeam(TeamUpdateRequest teamUpdateRequest, User loginUser);
 }

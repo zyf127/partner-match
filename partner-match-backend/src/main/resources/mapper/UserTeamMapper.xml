@@ -19,4 +19,5 @@
         join_time,create_time,update_time,
         is_delete
     </sql>
+
 </mapper>

@@ -1,14 +1,14 @@
-package com.zyf.model.dto;
+package com.zyf.model.request;
 
-import com.zyf.common.PageRequest;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Date;
 
 @Data
-public class TeamQuery extends PageRequest implements Serializable {
+public class TeamUpdateRequest implements Serializable {
 
-    private static final long serialVersionUID = -9168870907576666106L;
+    private static final long serialVersionUID = 5833561635848665188L;
 
     /**
      * id
@@ -26,14 +26,9 @@ public class TeamQuery extends PageRequest implements Serializable {
     private String description;
 
     /**
-     * 最大人数
+     * 过期时间
      */
-    private Integer maxNum;
-
-    /**
-     * 用户id
-     */
-    private Long userId;
+    private Date expireTime;
 
     /**
      * 0 - 公开，1 - 私有，2 - 加密
@@ -41,7 +36,8 @@ public class TeamQuery extends PageRequest implements Serializable {
     private Integer status;
 
     /**
-     * 关键词
+     * 密码
      */
-    private String searchText;
+    private String password;
+
 }

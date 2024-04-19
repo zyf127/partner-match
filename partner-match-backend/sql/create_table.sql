@@ -57,7 +57,7 @@ create table team
     status int default 0 not null comment '0 - 公开，1 - 私有，2 - 加密',
     password varchar(512) null comment '密码',
     create_time datetime default CURRENT_TIMESTAMP null comment '创建时间',
-    update_time datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    update_time datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment '更新时间',
     is_delete tinyint default 0 not null comment '是否删除'
 )
     comment '队伍';
@@ -72,7 +72,7 @@ create table user_team
     team_id bigint comment '队伍id',
     join_time datetime null comment '加入时间',
     create_time datetime default CURRENT_TIMESTAMP null comment '创建时间',
-    update_time datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    update_time datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment '更新时间',
     is_delete tinyint default 0 not null comment '是否删除'
 )
 

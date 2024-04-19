@@ -51,7 +51,7 @@ public class UserTeam implements Serializable {
     private Integer isDelete;
 
     @TableField(exist = false)
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -3054206188689829094L;
 
     @Override
     public boolean equals(Object that) {

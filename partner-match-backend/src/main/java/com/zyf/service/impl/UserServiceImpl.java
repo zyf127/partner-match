@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.zyf.common.ErrorCode;
+import com.zyf.constant.UserConstant;
 import com.zyf.model.domain.User;
 import com.zyf.exception.BusinessException;
 import com.zyf.mapper.UserMapper;
@@ -43,6 +44,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      * 账户正则，检验账户是否合法
      */
     private static final String VALID_PATTERN = "^[A-Za-z0-9]+$";
+
     /**
      * 盐值，混淆密码
      */
@@ -175,7 +177,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     @Override
     public User getCurrentUser(HttpServletRequest request) {
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User currentUser = (User)userObj;
+        User currentUser = (User) userObj;
         if (currentUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN);
         }
@@ -242,23 +244,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     /**
-     * 用户修改
+     * 更新用户
      *
-     * @param user 用户信息
-     * @param request
-     * @return 是否修改成功
+     * @param user      用户信息
+     * @param loginUser
+     * @return 是否更新成功
      */
     @Override
-    public int updateUser(User user, HttpServletRequest request) {
+    public int updateUser(User user, User loginUser) {
         // 检验要修改的用户
         if (user == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // TODO 补充校验，如果用户没有传任何要更新的值，就直接报错，不用执行 update 语句
         long userId = user.getId();
-        // 获取登录态中的用户
-        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User loginUser = (User)userObj;
+
         // 是否登录
         if (loginUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN);
@@ -281,13 +281,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      *
      * @param pageSize 页面大小
      * @param pageNum 页号
-     * @param request
+     * @param loginUser 当前登录的用户
      * @return 推荐的用户
      */
     @Override
-    public List<User> recommendUsers(long pageSize, long pageNum, HttpServletRequest request) {
-        User loginUser = this.getCurrentUser(request);
-        String redisKey = String.format("partner-match:user:recommend:%s", loginUser.getId());
+    public List<User> recommendUsers(long pageSize, long pageNum, User loginUser) {
+        Long userId = loginUser.getId();
+        String redisKey = null;
+        if (userId != null) {
+            redisKey = String.format("partner-match:user:recommend:%s", userId);
+        } else {
+            redisKey = String.format("partner-match:user:recommend:%s", -1);
+        }
         ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
         // 如果有缓存，直接读缓存
         Page<User> userPage = (Page<User>) valueOperations.get(redisKey);
@@ -303,6 +308,32 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
         List<User> userList = userPage.getRecords();
         return userList.stream().map((user) -> this.getSafetyUser(user)).collect(Collectors.toList());
+    }
+
+    /**
+     * 获取指定队伍中的用户
+     *
+     * @param teamId 队伍id
+     * @return 用户列表
+     */
+    public List<User> getUsersByTeamId(Long teamId) {
+        List<User> userList = userMapper.selectUsersByTeamId(teamId);
+        List<User> safeUserList = userList.stream().map(this::getSafetyUser).collect(Collectors.toList());
+        return safeUserList;
+    }
+
+    /**
+     * 鉴权
+     *
+     * @param loginUser 当前登录的用户
+     * @return 是否为管理员
+     */
+    @Override
+    public boolean isAdmin(User loginUser) {
+        if (loginUser == null || loginUser.getUserRole() != UserConstant.ADMIN_ROLE) {
+            return false;
+        }
+        return true;
     }
 
     /**

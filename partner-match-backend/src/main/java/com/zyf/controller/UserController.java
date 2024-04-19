@@ -21,8 +21,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.zyf.constant.UserConstant.USER_LOGIN_STATE;
-
 /**
  * 用户接口
  *
@@ -47,7 +45,7 @@ public class UserController {
     @PostMapping("/register")
     public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
         if (userRegisterRequest == null) {
-           throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         String userAccount = userRegisterRequest.getUserAccount();
         String userPassword = userRegisterRequest.getUserPassword();
@@ -81,10 +79,10 @@ public class UserController {
     }
 
     /**
-     * 注销
+     * 用户注销接口
      *
      * @param request
-     * @return
+     * @return 是否注销成功
      */
     @PostMapping("/logout")
     public BaseResponse<Integer> userLogout(HttpServletRequest request) {
@@ -105,7 +103,7 @@ public class UserController {
     }
 
     /**
-     * 用户查询接口
+     * 查询用户接口
      *
      * @param username 用户名
      * @return 用户集合
@@ -144,21 +142,22 @@ public class UserController {
      * 推荐用户接口
      *
      * @param pageSize 页面大小
-     * @param pageNum 页号
+     * @param pageNum  页号
      * @param request
      * @return 推荐的用户
      */
     @GetMapping("/recommend")
     public BaseResponse<List<User>> recommendUsers(long pageSize, long pageNum, HttpServletRequest request) {
-        List<User> safetyUserList = userService.recommendUsers(pageSize, pageNum, request);
+        User loginUser = userService.getCurrentUser(request);
+        List<User> safetyUserList = userService.recommendUsers(pageSize, pageNum, loginUser);
         return ResultUtils.success(safetyUserList);
     }
 
     /**
-     * 用户删除接口
+     * 删除接口
      *
      * @param id 用户id
-     * @return 是否删除
+     * @return 是否删除成功
      */
     @PostMapping("/delete")
     public BaseResponse<Boolean> deleteUser(@RequestBody long id, HttpServletRequest request) {
@@ -174,18 +173,19 @@ public class UserController {
     }
 
     /**
-     * 用户修改接口
+     * 更新用户接口
      *
-     * @param user 用户信息
+     * @param user    用户信息
      * @param request
-     * @return 是否修改成功
+     * @return 是否更新成功
      */
     @PostMapping("/update")
     public BaseResponse<Integer> updateUser(@RequestBody User user, HttpServletRequest request) {
         if (user == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        int updateResult = userService.updateUser(user, request);
+        User loginUser = userService.getCurrentUser(request);
+        int updateResult = userService.updateUser(user, loginUser);
         return ResultUtils.success(updateResult);
     }
 
@@ -196,11 +196,7 @@ public class UserController {
      * @return 是否为管理员
      */
     public boolean isAdmin(HttpServletRequest request) {
-        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User user = (User)userObj;
-        if (user == null || user.getUserRole() != UserConstant.ADMIN_ROLE) {
-            return false;
-        }
-        return true;
+        User loginUser = userService.getCurrentUser(request);
+        return userService.isAdmin(loginUser);
     }
 }

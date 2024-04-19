@@ -25,7 +25,6 @@ public interface UserService extends IService<User> {
      *
      * @param userAccount 账户
      * @param userPassword 密码
-     * @param request
      * @return 脱敏后的用户信息
      */
     User userLogin(String userAccount, String userPassword, HttpServletRequest request);
@@ -63,21 +62,31 @@ public interface UserService extends IService<User> {
     List<User> searchUsersByTagNames(List<String> tagNameList);
 
     /**
-     * 用户修改
+     * 更新用户
      *
-     * @param user 用户信息
-     * @param request
-     * @return 是否修改成功
+     * @param user      用户信息
+     * @param loginUser
+     * @return 是否更新成功
      */
-    int updateUser(User user, HttpServletRequest request);
+    int updateUser(User user, User loginUser);
 
     /**
      * 推荐用户
      *
      * @param pageSize 页面大小
      * @param pageNum 页号
-     * @param request
+     * @param loginUser 当前登录的用户
      * @return 推荐的用户
      */
-    List<User> recommendUsers(long pageSize, long pageNum, HttpServletRequest request);
+    List<User> recommendUsers(long pageSize, long pageNum, User loginUser);
+
+    /**
+     * 获取指定队伍中的用户
+     *
+     * @param teamId 队伍id
+     * @return 用户列表
+     */
+    List<User> getUsersByTeamId(Long teamId);
+
+    boolean isAdmin(User loginUser);
 }
