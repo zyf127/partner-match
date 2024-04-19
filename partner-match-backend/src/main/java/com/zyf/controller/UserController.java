@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.zyf.common.BaseResponse;
 import com.zyf.common.ErrorCode;
 import com.zyf.common.ResultUtils;
-import com.zyf.constant.UserConstant;
 import com.zyf.model.domain.User;
 import com.zyf.model.request.UserLoginRequest;
 import com.zyf.model.request.UserRegisterRequest;
@@ -98,7 +97,7 @@ public class UserController {
      */
     @GetMapping("/current")
     public BaseResponse<User> getCurrentUser(HttpServletRequest request) {
-        User safetyUser = userService.getCurrentUser(request);
+        User safetyUser = userService.getLoginUser(request);
         return ResultUtils.success(safetyUser);
     }
 
@@ -148,7 +147,7 @@ public class UserController {
      */
     @GetMapping("/recommend")
     public BaseResponse<List<User>> recommendUsers(long pageSize, long pageNum, HttpServletRequest request) {
-        User loginUser = userService.getCurrentUser(request);
+        User loginUser = userService.getLoginUser(request);
         List<User> safetyUserList = userService.recommendUsers(pageSize, pageNum, loginUser);
         return ResultUtils.success(safetyUserList);
     }
@@ -184,7 +183,7 @@ public class UserController {
         if (user == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User loginUser = userService.getCurrentUser(request);
+        User loginUser = userService.getLoginUser(request);
         int updateResult = userService.updateUser(user, loginUser);
         return ResultUtils.success(updateResult);
     }
@@ -196,7 +195,7 @@ public class UserController {
      * @return 是否为管理员
      */
     public boolean isAdmin(HttpServletRequest request) {
-        User loginUser = userService.getCurrentUser(request);
+        User loginUser = userService.getLoginUser(request);
         return userService.isAdmin(loginUser);
     }
 }

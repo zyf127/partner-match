@@ -43,7 +43,7 @@ public interface UserService extends IService<User> {
      * @param request
      * @return 当前用户信息
      */
-    User getCurrentUser(HttpServletRequest request);
+    User getLoginUser(HttpServletRequest request);
 
     /**
      * 用户脱敏

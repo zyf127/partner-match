@@ -1,6 +1,7 @@
 package com.zyf.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zyf.common.ErrorCode;
 import com.zyf.exception.BusinessException;
@@ -49,18 +50,6 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     @Resource
     private UserTeamService userTeamService;
 
-    /**
-     * 盐值，混淆密码
-     */
-    private static final String SALT = "zyf";
-
-    /**
-     * 创建队伍
-     *
-     * @param team 队伍信息
-     * @param loginUser 登录的用户
-     * @return 队伍id
-     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public long addTeam(Team team, User loginUser) {
@@ -101,8 +90,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             if (StringUtils.isBlank(password) || password.length() > 32) {
                 throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码设置不正确");
             }
-            String encryptPassword = DigestUtils.md5DigestAsHex((SALT + password).getBytes());
-            team.setPassword(encryptPassword);
+            team.setPassword(password);
         }
 
         // 超时时间晚于当前时间
@@ -194,6 +182,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
 
     @Override
     public boolean updateTeam(TeamUpdateRequest teamUpdateRequest, User loginUser) {
+        // 1. 条件校验
         if (teamUpdateRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -209,24 +198,35 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         if (oldTeam.getUserId() != loginUser.getId() && userService.isAdmin(loginUser)) {
             throw new BusinessException(ErrorCode.NO_AUTH);
         }
-        TeamStatusEnum statusEnum = TeamStatusEnum.getEnumByValue(teamUpdateRequest.getStatus());
+        Integer status = teamUpdateRequest.getStatus();
+        TeamStatusEnum statusEnum = TeamStatusEnum.getEnumByValue(status);
         TeamStatusEnum oldStatusEnum = TeamStatusEnum.getEnumByValue(oldTeam.getStatus());
         String password = teamUpdateRequest.getPassword();
         // 加密队伍必须要设置密码
-        if (statusEnum.equals(TeamStatusEnum.SECRET)) {
-            if (!oldStatusEnum.equals(TeamStatusEnum.SECRET)) {
+        if (TeamStatusEnum.SECRET.equals(statusEnum)) {
+            if (!TeamStatusEnum.SECRET.equals(oldStatusEnum)) {
                 if (StringUtils.isBlank(password)) {
                     throw new BusinessException(ErrorCode.PARAMS_ERROR, "加密房间必须要设置密码");
                 }
             } else {
-                if (StringUtils.isBlank(password)) {
-                    teamUpdateRequest.setPassword(null);
+                if (StringUtils.isBlank((password))) {
+                    password = null;
                 }
             }
         }
-        Team newTeam = new Team();
-        BeanUtils.copyProperties(teamUpdateRequest, newTeam);
-        return this.updateById(newTeam);
+        String teamName = teamUpdateRequest.getTeamName();
+        String description = teamUpdateRequest.getDescription();
+        Date expireTime = teamUpdateRequest.getExpireTime();
+
+        // 2. 设置更新条件
+        UpdateWrapper<Team> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.set(teamName != "", "team_name", teamName);
+        updateWrapper.set(description != "", "description", description);
+        updateWrapper.set(expireTime != null, "expire_time", expireTime);
+        updateWrapper.set( "status", status);
+        updateWrapper.set(password != null, "password", password);
+        updateWrapper.eq("id", id);
+        return this.update(updateWrapper);
     }
 }
 

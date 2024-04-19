@@ -62,14 +62,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     @Resource
     private RedisTemplate redisTemplate;
 
-    /**
-     * 用户注册
-     *
-     * @param userAccount 账号
-     * @param userPassword 密码
-     * @param checkPassword 检验密码
-     * @return 新用户 id
-     */
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword) {
         // 1. 校验
@@ -111,14 +103,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return user.getId();
     }
 
-    /**
-     * 用户登录
-     *
-     * @param userAccount 账户
-     * @param userPassword 密码
-     * @param request
-     * @return 脱敏后的用户信息
-     */
     @Override
     public User userLogin(String userAccount, String userPassword, HttpServletRequest request) {
         // 1.检验账户和密码是否合法
@@ -156,26 +140,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return safetyUser;
     }
 
-    /**
-     * 用户注销
-     *
-     * @param request
-     * @return
-     */
     @Override
     public int userLogout(HttpServletRequest request) {
         request.getSession().removeAttribute(USER_LOGIN_STATE);
         return 1;
     }
 
-    /**
-     * 获取当前用户登录态
-     *
-     * @param request
-     * @return 当前用户信息
-     */
     @Override
-    public User getCurrentUser(HttpServletRequest request) {
+    public User getLoginUser(HttpServletRequest request) {
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
         User currentUser = (User) userObj;
         if (currentUser == null) {
@@ -187,12 +159,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return safetyUser;
     }
 
-    /**
-     * 用户脱敏
-     *
-     * @param user 脱敏前的用户信息
-     * @return 脱敏后的用户信息
-     */
     public User getSafetyUser(User user) {
         if (user == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "脱敏前的用户信息为空");
@@ -213,12 +179,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return safetyUser;
     }
 
-    /**
-     * 根据标签名称搜索用户（内存过滤版）
-     *
-     * @param tagNameList 标签名称列表
-     * @return 搜索到的用户
-     */
     @Override
     public List<User> searchUsersByTagNames(List<String> tagNameList) {
         if (CollectionUtils.isEmpty(tagNameList)) {
@@ -243,13 +203,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }).map(this::getSafetyUser).collect(Collectors.toList());
     }
 
-    /**
-     * 更新用户
-     *
-     * @param user      用户信息
-     * @param loginUser
-     * @return 是否更新成功
-     */
     @Override
     public int updateUser(User user, User loginUser) {
         // 检验要修改的用户
@@ -276,14 +229,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return userMapper.updateById(user);
     }
 
-    /**
-     * 推荐用户
-     *
-     * @param pageSize 页面大小
-     * @param pageNum 页号
-     * @param loginUser 当前登录的用户
-     * @return 推荐的用户
-     */
     @Override
     public List<User> recommendUsers(long pageSize, long pageNum, User loginUser) {
         Long userId = loginUser.getId();
@@ -316,18 +261,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      * @param teamId 队伍id
      * @return 用户列表
      */
+    @Override
     public List<User> getUsersByTeamId(Long teamId) {
         List<User> userList = userMapper.selectUsersByTeamId(teamId);
         List<User> safeUserList = userList.stream().map(this::getSafetyUser).collect(Collectors.toList());
         return safeUserList;
     }
 
-    /**
-     * 鉴权
-     *
-     * @param loginUser 当前登录的用户
-     * @return 是否为管理员
-     */
     @Override
     public boolean isAdmin(User loginUser) {
         if (loginUser == null || loginUser.getUserRole() != UserConstant.ADMIN_ROLE) {

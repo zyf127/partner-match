@@ -58,7 +58,7 @@ public class TeamController {
         }
         Team team = new Team();
         BeanUtils.copyProperties(teamAddRequest, team);
-        User loginUser = userService.getCurrentUser(request);
+        User loginUser = userService.getLoginUser(request);
         long teamId = teamService.addTeam(team, loginUser);
         return ResultUtils.success(teamId);
     }
@@ -93,7 +93,7 @@ public class TeamController {
         if (teamUpdateRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User loginUser = userService.getCurrentUser(request);
+        User loginUser = userService.getLoginUser(request);
         boolean result = teamService.updateTeam(teamUpdateRequest, loginUser);
         if (!result) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "修改失败");
