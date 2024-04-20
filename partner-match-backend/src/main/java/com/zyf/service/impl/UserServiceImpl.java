@@ -10,6 +10,7 @@ import com.zyf.constant.UserConstant;
 import com.zyf.model.domain.User;
 import com.zyf.exception.BusinessException;
 import com.zyf.mapper.UserMapper;
+import com.zyf.model.request.TeamJoinRequest;
 import com.zyf.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -149,11 +150,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     @Override
     public User getLoginUser(HttpServletRequest request) {
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User currentUser = (User) userObj;
-        if (currentUser == null) {
+        User loginUser = (User) userObj;
+        if (loginUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN);
         }
-        long userId = currentUser.getId();
+        long userId = loginUser.getId();
         User user = userMapper.selectById(userId);
         User safetyUser = this.getSafetyUser(user);
         return safetyUser;

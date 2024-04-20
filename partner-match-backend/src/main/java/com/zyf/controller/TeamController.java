@@ -11,6 +11,8 @@ import com.zyf.model.dto.TeamQuery;
 import com.zyf.model.domain.Team;
 import com.zyf.exception.BusinessException;
 import com.zyf.model.request.TeamAddRequest;
+import com.zyf.model.request.TeamJoinRequest;
+import com.zyf.model.request.TeamQuitRequest;
 import com.zyf.model.request.TeamUpdateRequest;
 import com.zyf.model.vo.TeamUserVO;
 import com.zyf.service.TeamService;
@@ -76,7 +78,7 @@ public class TeamController {
         }
         boolean result = teamService.removeById(id);
         if (!result) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "删除失败");
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "删除队伍失败");
         }
         return ResultUtils.success(true);
     }
@@ -96,7 +98,7 @@ public class TeamController {
         User loginUser = userService.getLoginUser(request);
         boolean result = teamService.updateTeam(teamUpdateRequest, loginUser);
         if (!result) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "修改失败");
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "修改队伍失败");
         }
         return ResultUtils.success(true);
     }
@@ -134,6 +136,44 @@ public class TeamController {
         Page<Team> teamPage = teamService.page(page, queryWrapper);
         List<Team> teamList = teamPage.getRecords();
         return ResultUtils.success(teamList);
+    }
+
+    /**
+     * 加入队伍接口
+     *
+     * @param teamJoinRequest 队伍信息
+     * @return 是否加入成功
+     */
+    @PostMapping("/join")
+    public BaseResponse<Boolean> joinTeam(@RequestBody TeamJoinRequest teamJoinRequest, HttpServletRequest request) {
+        if (teamJoinRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        boolean result = teamService.joinTeam(teamJoinRequest, loginUser);
+        if (!result) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "加入队伍失败");
+        }
+        return ResultUtils.success(true);
+    }
+
+    /**
+     *  退出队伍接口
+     * @param teamQuitRequest 队伍信息
+     * @param request
+     * @return 是否退出成功
+     */
+    @PostMapping("/quit")
+    public BaseResponse<Boolean> quitTeam(@RequestBody TeamQuitRequest teamQuitRequest, HttpServletRequest request) {
+        if (teamQuitRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        boolean result = teamService.quitTeam(teamQuitRequest, loginUser);
+        if (!result) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "退出队伍失败");
+        }
+        return ResultUtils.success(true);
     }
 }
 

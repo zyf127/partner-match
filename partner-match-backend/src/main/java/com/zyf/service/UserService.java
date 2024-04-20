@@ -2,6 +2,7 @@ package com.zyf.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.zyf.model.domain.User;
+import com.zyf.model.request.TeamJoinRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -88,5 +89,11 @@ public interface UserService extends IService<User> {
      */
     List<User> getUsersByTeamId(Long teamId);
 
+    /**
+     * 当前登录的用户是否为管理员
+     *
+     * @param loginUser 当前登录的用户
+     * @return 是否为管理员
+     */
     boolean isAdmin(User loginUser);
 }
