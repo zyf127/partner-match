@@ -4,6 +4,7 @@ import com.zyf.model.domain.Team;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.zyf.model.domain.User;
 import com.zyf.model.dto.TeamQuery;
+import com.zyf.model.request.TeamDeleteRequest;
 import com.zyf.model.request.TeamJoinRequest;
 import com.zyf.model.request.TeamQuitRequest;
 import com.zyf.model.request.TeamUpdateRequest;
@@ -57,4 +58,12 @@ public interface TeamService extends IService<Team> {
      * @return 是否退出成功
      */
     boolean quitTeam(TeamQuitRequest teamQuitRequest, User loginUser);
+
+    /**
+     * 删除（退出）队伍
+     * @param teamDeleteRequest 队伍信息
+     * @param loginUser 当前登录的用户
+     * @return 是否删除成功
+     */
+    boolean deleteTeam(TeamDeleteRequest teamDeleteRequest, User loginUser);
 }

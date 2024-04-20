@@ -10,10 +10,7 @@ import com.zyf.model.domain.User;
 import com.zyf.model.dto.TeamQuery;
 import com.zyf.model.domain.Team;
 import com.zyf.exception.BusinessException;
-import com.zyf.model.request.TeamAddRequest;
-import com.zyf.model.request.TeamJoinRequest;
-import com.zyf.model.request.TeamQuitRequest;
-import com.zyf.model.request.TeamUpdateRequest;
+import com.zyf.model.request.*;
 import com.zyf.model.vo.TeamUserVO;
 import com.zyf.service.TeamService;
 import com.zyf.service.UserService;
@@ -63,24 +60,6 @@ public class TeamController {
         User loginUser = userService.getLoginUser(request);
         long teamId = teamService.addTeam(team, loginUser);
         return ResultUtils.success(teamId);
-    }
-
-    /**
-     * 删除队伍接口
-     *
-     * @param id 队伍id
-     * @return 是否删除成功
-     */
-    @PostMapping("/delete")
-    public BaseResponse<Boolean> deleteTeam(@RequestBody long id) {
-        if (id <= 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-        boolean result = teamService.removeById(id);
-        if (!result) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "删除队伍失败");
-        }
-        return ResultUtils.success(true);
     }
 
     /**
@@ -172,6 +151,26 @@ public class TeamController {
         boolean result = teamService.quitTeam(teamQuitRequest, loginUser);
         if (!result) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "退出队伍失败");
+        }
+        return ResultUtils.success(true);
+    }
+
+    /**
+     * 删除（解散）队伍接口
+     *
+     * @param teamDeleteRequest 队伍信息
+     * @param request
+     * @return 是否删除成功
+     */
+    @PostMapping("/delete")
+    public BaseResponse<Boolean> deleteTeam(@RequestBody TeamDeleteRequest teamDeleteRequest, HttpServletRequest request) {
+        if (teamDeleteRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        boolean result = teamService.deleteTeam(teamDeleteRequest, loginUser);
+        if (!result) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "删除队伍失败");
         }
         return ResultUtils.success(true);
     }

@@ -10,6 +10,7 @@ import com.zyf.model.domain.User;
 import com.zyf.model.domain.UserTeam;
 import com.zyf.model.dto.TeamQuery;
 import com.zyf.model.enums.TeamStatusEnum;
+import com.zyf.model.request.TeamDeleteRequest;
 import com.zyf.model.request.TeamJoinRequest;
 import com.zyf.model.request.TeamQuitRequest;
 import com.zyf.model.request.TeamUpdateRequest;
@@ -291,6 +292,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean quitTeam(TeamQuitRequest teamQuitRequest, User loginUser) {
         // 1. 校验请求参数
         if (teamQuitRequest == null) {
@@ -352,6 +354,41 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         userTeamQueryWrapper.eq("user_id", userId);
         userTeamQueryWrapper.eq("team_id", teamId);
         return userTeamService.remove(userTeamQueryWrapper);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean deleteTeam(TeamDeleteRequest teamDeleteRequest, User loginUser) {
+        // 1. 请求参数是否为空
+        if (teamDeleteRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+
+        // 2. 队伍是否存在
+        Long teamId = teamDeleteRequest.getTeamId();
+        if (teamId == null || teamId <= 0) {
+            throw new BusinessException(ErrorCode.NULL_ERROR, "队伍不存在");
+        }
+        Team team = this.getById(teamId);
+        if (team == null) {
+            throw new BusinessException(ErrorCode.NULL_ERROR, "队伍不存在");
+        }
+
+        // 3. 当前用户是否为队长
+        if (team.getUserId() != loginUser.getId()) {
+            throw new BusinessException(ErrorCode.NO_AUTH, "没有解散队伍的权限");
+        }
+
+        // 4. 移除用户队伍关系
+        QueryWrapper<UserTeam> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("team_id", teamId);
+        boolean result = userTeamService.remove(queryWrapper);
+        if (!result) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "删除用户队伍关联信息失败");
+        }
+
+        // 5. 删除队伍
+        return this.removeById(teamId);
     }
 }
 

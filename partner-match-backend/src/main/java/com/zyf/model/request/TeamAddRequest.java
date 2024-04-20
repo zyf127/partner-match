@@ -9,6 +9,7 @@ import java.util.Date;
 public class TeamAddRequest implements Serializable {
 
     private static final long serialVersionUID = 8612306571459986187L;
+
     /**
      * 队伍名称
      */
