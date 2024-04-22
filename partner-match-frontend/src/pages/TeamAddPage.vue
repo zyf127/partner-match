@@ -9,7 +9,7 @@
             :rules="[{ required: true, message: '请填写队伍名'}, {validator: value => value.length <= 20, message: '队伍名不超过 20 个字符'}]"
         />
         <van-field
-            v-model="teamData.description"
+            v-model="teamData.teamDescription"
             rows="3"
             autosize
             label="队伍描述"
@@ -49,7 +49,7 @@
 
         <van-field name="radio" label="队伍状态">
           <template #input>
-            <van-radio-group v-model="teamData.status" direction="horizontal">
+            <van-radio-group v-model="teamData.teamStatus" direction="horizontal">
               <van-radio name="0">公开</van-radio>
               <van-radio name="1">私有</van-radio>
               <van-radio name="2">加密</van-radio>
@@ -57,9 +57,9 @@
           </template>
         </van-field>
         <van-field
-            v-if="Number(teamData.status) === 2"
-            v-model="teamData.password"
-            type="password"
+            v-if="Number(teamData.teamStatus) === 2"
+            v-model="teamData.teamPassword"
+            type="teamPassword"
             label="密码"
             placeholder="请输入密码"
             :rules="[{ required: true, message: '请填写密码'}, {validator: value => value.length <= 32, message: '密码不超过 32 个字符'}]"
@@ -85,11 +85,11 @@
 
   const initTeamData = {
     "teamName": "",
-    "description": "",
+    "teamDescription": "",
     "maxNum": 2,
     "expireTime": "",
-    "status": "0",
-    "password": ""
+    "teamStatus": "0",
+    "teamPassword": ""
   }
 
   const teamData = ref({...initTeamData});
@@ -107,7 +107,7 @@
   const onSubmit = async () => {
     let teamPostData = {
       ...teamData.value,
-      status: Number(teamData.value.status),
+      teamStatus: Number(teamData.value.teamStatus),
       expireTime: new Date(teamData.value.expireTime)
     };
 

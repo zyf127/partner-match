@@ -20,21 +20,18 @@ onMounted(async () => {
   })
       .then(function (response) {
         // 处理成功情况
-        console.log('/user/search/tagNames success', response);
-        showSuccessToast('请求成功');
+        showSuccessToast('推荐用户成功');
         return response?.data;
       })
       .catch(function (error) {
         // 处理错误情况
         console.log('/user/search/tagNames error', error);
-        showFailToast('请求失败');
+        showFailToast('推荐用户失败');
       });
   if (userListData) {
     userListData.forEach(user => {
       if (user.tagNames) {
-        console.log(user.tagNames)
         user.tagNames = JSON.parse(user.tagNames);
-        console.log(user.tagNames);
       }
     });
     userList.value = userListData;

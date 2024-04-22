@@ -7,6 +7,7 @@ import SearchResultPage from "../pages/SearchResultPage.vue";
 import UserLoginPage from "../pages/UserLoginPage.vue";
 import * as VueRouter from "vue-router";
 import TeamAddPage from "../pages/TeamAddPage.vue";
+import TeamDetailPage from "../pages/TeamDetailPage.vue";
 
 const routes = [
     { path: '/', component: Index },
@@ -16,7 +17,8 @@ const routes = [
     {path: '/user/login', component: UserLoginPage},
     {path: '/user/list', component: SearchResultPage},
     {path: '/user/edit', component: UserEditPage},
-    {path: '/team/add', component: TeamAddPage}
+    {path: '/team/add', component: TeamAddPage},
+    {path: '/team/detail', component: TeamDetailPage}
 ]
 
 const router = VueRouter.createRouter({

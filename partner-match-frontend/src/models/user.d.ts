@@ -9,7 +9,7 @@ export type UserType = {
     gender:number;
     phone: string;
     email: string;
-    profile: string;
+    userProfile: string;
     tagNames: string[];
     userStatus: number;
     userRole: number;

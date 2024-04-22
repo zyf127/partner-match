@@ -1,6 +1,6 @@
 <template>
   <van-card v-for="user in userList"
-            :desc="user.profile"
+            :desc="user.userProfile"
             :title="user.username"
             :thumb="user.avatarUrl"
             :tag="user.gender == 0 ? '女' : '男'">

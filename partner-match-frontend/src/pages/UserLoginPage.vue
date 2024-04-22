@@ -41,7 +41,7 @@
     });
     if (res["code"] === 0 && res.data) {
       showSuccessToast('登录成功');
-      router.replace('/user');
+      router.back();
     } else {
       showFailToast('登录失败');
     }

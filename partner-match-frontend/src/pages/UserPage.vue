@@ -8,7 +8,10 @@
     <van-cell title="性别" is-link :value="user.gender === 0 ? '女' : '男'" @click="toEdit('gender', '性别', user.gender)"/>
     <van-cell title="手机号" is-link :value="user.phone" @click="toEdit('phone', '手机号', user.phone)"/>
     <van-cell title="邮箱" is-link :value="user.email" @click="toEdit('email', '邮箱', user.email)"/>
-    <van-cell title="注册时间" :value="user.createTime"/>
+    <van-cell title="注册时间" :value="formatDateTime(user.createTime)"/>
+    <div style="padding: 10px;">
+      <van-button type="primary" block @click="logout">退 出 登 录</van-button>
+    </div>
   </template>
 </template>
 
@@ -16,6 +19,9 @@
   import {onMounted, ref} from "vue";
   import {useRouter} from "vue-router";
   import {getCurrentUser} from "../services/user.ts";
+  import {formatDateTime} from "../services/team.ts";
+  import myAxios from "../plugins/myAxios";
+  import {showFailToast, showSuccessToast} from "vant";
 
   const router = useRouter();
   const user = ref();
@@ -35,6 +41,16 @@
       }
     });
   };
+
+  const logout = async () => {
+    const res = await myAxios.post('/user/logout');
+    if (res['code'] === 0) {
+      showSuccessToast('退出登录成功');
+      location.reload();
+    } else {
+      showFailToast('退出登录失败');
+    }
+  }
 </script>
 
 <style scoped>
