@@ -10,7 +10,7 @@ import com.zyf.constant.UserConstant;
 import com.zyf.model.domain.User;
 import com.zyf.exception.BusinessException;
 import com.zyf.mapper.UserMapper;
-import com.zyf.model.request.TeamJoinRequest;
+import com.zyf.model.vo.TeamUserVO;
 import com.zyf.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -152,7 +152,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
         User loginUser = (User) userObj;
         if (loginUser == null) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN);
+            return null;
         }
         long userId = loginUser.getId();
         User user = userMapper.selectById(userId);
@@ -172,7 +172,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         safetyUser.setGender(user.getGender());
         safetyUser.setPhone(user.getPhone());
         safetyUser.setEmail(user.getEmail());
-        safetyUser.setProfile(user.getProfile());
+        safetyUser.setUserProfile(user.getUserProfile());
         safetyUser.setTagNames(user.getTagNames());
         safetyUser.setUserStatus(user.getUserStatus());
         safetyUser.setUserRole(user.getUserRole());
@@ -206,6 +206,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Override
     public int updateUser(User user, User loginUser) {
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
         // 检验要修改的用户
         if (user == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -232,10 +235,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Override
     public List<User> recommendUsers(long pageSize, long pageNum, User loginUser) {
-        Long userId = loginUser.getId();
         String redisKey = null;
-        if (userId != null) {
-            redisKey = String.format("partner-match:user:recommend:%s", userId);
+        if (loginUser != null && loginUser.getId() != null) {
+            redisKey = String.format("partner-match:user:recommend:%s", loginUser.getId());
         } else {
             redisKey = String.format("partner-match:user:recommend:%s", -1);
         }

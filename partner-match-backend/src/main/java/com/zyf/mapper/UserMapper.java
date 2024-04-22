@@ -11,7 +11,7 @@ import java.util.List;
 public interface UserMapper extends BaseMapper<User> {
     /**
      *  获取指定队伍中的用户
-     * @param teamId 队伍id
+     * @param teamId 队伍 id
      * @return 用户列表
      */
     List<User> selectUsersByTeamId(Long teamId);

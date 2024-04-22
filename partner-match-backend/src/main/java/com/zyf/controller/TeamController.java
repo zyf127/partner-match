@@ -1,8 +1,5 @@
 package com.zyf.controller;
 
-
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zyf.common.BaseResponse;
 import com.zyf.common.ErrorCode;
 import com.zyf.common.ResultUtils;
@@ -93,6 +90,8 @@ public class TeamController {
         if (teamQuery == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        teamQuery.setPageNum(null);
+        teamQuery.setPageSize(null);
         List<TeamUserVO> teamUserVOList = teamService.listTeams(teamQuery);
         return ResultUtils.success(teamUserVOList);
     }
@@ -104,17 +103,27 @@ public class TeamController {
      * @return 匹配的队伍
      */
     @GetMapping("/list/page")
-    public BaseResponse<List<Team>> listTeamsByPage(TeamQuery teamQuery) {
+    public BaseResponse<List<TeamUserVO>> listTeamsByPage(TeamQuery teamQuery) {
         if (teamQuery == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        Team team = new Team();
-        BeanUtils.copyProperties(teamQuery, team);
-        Page<Team> page = new Page<>(teamQuery.getPageNum(), teamQuery.getPageSize());
-        QueryWrapper<Team> queryWrapper = new QueryWrapper<>(team);
-        Page<Team> teamPage = teamService.page(page, queryWrapper);
-        List<Team> teamList = teamPage.getRecords();
-        return ResultUtils.success(teamList);
+        List<TeamUserVO> teamUserVOList = teamService.listTeams(teamQuery);
+        return ResultUtils.success(teamUserVOList);
+    }
+
+    /**
+     * 查看指定队伍
+     *
+     * @param teamId 队伍 id
+     * @return 指定队伍信息
+     */
+    @GetMapping("/detail")
+    public BaseResponse<TeamUserVO> showTeamDetail(Long teamId) {
+        if (teamId == null || teamId <= 0) {
+            throw new BusinessException(ErrorCode.NULL_ERROR, "队伍不存在");
+        }
+        TeamUserVO teamUserVO = teamService.showTeamDetail(teamId);
+        return ResultUtils.success(teamUserVO);
     }
 
     /**

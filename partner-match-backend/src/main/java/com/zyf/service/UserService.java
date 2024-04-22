@@ -3,6 +3,7 @@ package com.zyf.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.zyf.model.domain.User;
 import com.zyf.model.request.TeamJoinRequest;
+import com.zyf.model.vo.TeamUserVO;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;

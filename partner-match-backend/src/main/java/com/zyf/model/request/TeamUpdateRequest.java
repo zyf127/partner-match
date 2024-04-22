@@ -21,9 +21,9 @@ public class TeamUpdateRequest implements Serializable {
     private String teamName;
 
     /**
-     * 描述
+     * 队伍描述
      */
-    private String description;
+    private String teamDescription;
 
     /**
      * 过期时间
@@ -31,13 +31,13 @@ public class TeamUpdateRequest implements Serializable {
     private Date expireTime;
 
     /**
-     * 0 - 公开，1 - 私有，2 - 加密
+     * 队伍状态  0 - 公开，1 - 私有，2 - 加密
      */
-    private Integer status;
+    private Integer teamStatus;
 
     /**
-     * 密码
+     * 队伍密码
      */
-    private String password;
+    private String teamPassword;
 
 }

@@ -98,6 +98,9 @@ public class UserController {
     @GetMapping("/current")
     public BaseResponse<User> getCurrentUser(HttpServletRequest request) {
         User safetyUser = userService.getLoginUser(request);
+        if (safetyUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
         return ResultUtils.success(safetyUser);
     }
 
@@ -184,6 +187,9 @@ public class UserController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
         int updateResult = userService.updateUser(user, loginUser);
         return ResultUtils.success(updateResult);
     }
@@ -196,6 +202,9 @@ public class UserController {
      */
     public boolean isAdmin(HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
         return userService.isAdmin(loginUser);
     }
 }

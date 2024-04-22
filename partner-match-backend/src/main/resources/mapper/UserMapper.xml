@@ -13,7 +13,7 @@
             <result property="userPassword" column="user_password" jdbcType="VARCHAR"/>
             <result property="phone" column="phone" jdbcType="VARCHAR"/>
             <result property="email" column="email" jdbcType="VARCHAR"/>
-            <result property="profile" column="profile" jdbcType="VARCHAR"/>
+            <result property="userProfile" column="user_profile" jdbcType="VARCHAR"/>
             <result property="tagNames" column="tag_names" jdbcType="VARCHAR"/>
             <result property="userStatus" column="user_status" jdbcType="INTEGER"/>
             <result property="userRole" column="user_role" jdbcType="TINYINT"/>
@@ -25,7 +25,7 @@
     <sql id="Base_Column_List">
         id,username,user_account,
         avatar_url,gender,user_password,
-        phone,email,profile,
+        phone,email,user_profile,
         tag_names,user_status,user_role,
         create_time,update_time,is_delete
     </sql>
@@ -33,7 +33,7 @@
     <select id="selectUsersByTeamId" resultMap="BaseResultMap">
         SELECT
             u.id, u.username, u.user_account, u.avatar_url, u.gender, u.phone, u.email,
-            u.profile, u.tag_names, u.user_status, u.user_role, u.create_time, u.update_time
+            u.user_profile, u.tag_names, u.user_status, u.user_role, u.create_time, u.update_time
         FROM
             team t
         INNER JOIN
@@ -45,7 +45,7 @@
         ON
             u.id = ut.user_id
         WHERE
-            t.id = #{teamId}
+            t.id = #{teamId} AND ut.is_delete = 0
         ORDER BY
             ut.id ASC
     </select>

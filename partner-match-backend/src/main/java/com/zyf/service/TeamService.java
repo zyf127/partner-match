@@ -66,4 +66,12 @@ public interface TeamService extends IService<Team> {
      * @return 是否删除成功
      */
     boolean deleteTeam(TeamDeleteRequest teamDeleteRequest, User loginUser);
+
+    /**
+     * 查看指定队伍
+     *
+     * @param teamId 队伍 id
+     * @return 指定队伍信息
+     */
+    TeamUserVO showTeamDetail(Long teamId);
 }

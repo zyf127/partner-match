@@ -21,9 +21,9 @@ public class TeamQuery extends PageRequest implements Serializable {
     private String teamName;
 
     /**
-     * 描述
+     * 队伍描述
      */
-    private String description;
+    private String teamDescription;
 
     /**
      * 最大人数
@@ -31,14 +31,14 @@ public class TeamQuery extends PageRequest implements Serializable {
     private Integer maxNum;
 
     /**
-     * 用户id
+     * 用户 id
      */
     private Long userId;
 
     /**
-     * 0 - 公开，1 - 私有，2 - 加密
+     * 队伍状态  0 - 公开，1 - 私有，2 - 加密
      */
-    private Integer status;
+    private Integer teamStatus;
 
     /**
      * 关键词

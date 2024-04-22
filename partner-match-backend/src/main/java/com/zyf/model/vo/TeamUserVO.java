@@ -13,7 +13,7 @@ public class TeamUserVO implements Serializable {
     private static final long serialVersionUID = 4344729136279483637L;
 
     /**
-     * id
+     * 队伍id
      */
     private Long id;
 
@@ -23,9 +23,9 @@ public class TeamUserVO implements Serializable {
     private String teamName;
 
     /**
-     * 描述
+     * 队伍描述
      */
-    private String description;
+    private String teamDescription;
 
     /**
      * 最大人数
@@ -38,14 +38,14 @@ public class TeamUserVO implements Serializable {
     private Date expireTime;
 
     /**
-     * 用户id
+     * 用户 id
      */
     private Long userId;
 
     /**
-     * 0 - 公开，1 - 私有，2 - 加密
+     * 队伍状态  0 - 公开，1 - 私有，2 - 加密
      */
-    private Integer status;
+    private Integer teamStatus;
 
     /**
      * 创建时间

@@ -15,8 +15,8 @@ public class TeamJoinRequest implements Serializable {
     private Long teamId;
 
     /**
-     * 密码
+     * 队伍密码
      */
-    private String password;
+    private String teamPassword;
 
 }

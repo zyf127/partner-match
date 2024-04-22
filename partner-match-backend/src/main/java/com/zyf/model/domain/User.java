@@ -57,7 +57,7 @@ public class User implements Serializable {
     /**
      * 个人简介
      */
-    private String profile;
+    private String userProfile;
 
     /**
      * 标签名称 json 列表
@@ -113,7 +113,7 @@ public class User implements Serializable {
             && (this.getUserPassword() == null ? other.getUserPassword() == null : this.getUserPassword().equals(other.getUserPassword()))
             && (this.getPhone() == null ? other.getPhone() == null : this.getPhone().equals(other.getPhone()))
             && (this.getEmail() == null ? other.getEmail() == null : this.getEmail().equals(other.getEmail()))
-            && (this.getProfile() == null ? other.getProfile() == null : this.getProfile().equals(other.getProfile()))
+            && (this.getUserProfile() == null ? other.getUserProfile() == null : this.getUserProfile().equals(other.getUserProfile()))
             && (this.getTagNames() == null ? other.getTagNames() == null : this.getTagNames().equals(other.getTagNames()))
             && (this.getUserStatus() == null ? other.getUserStatus() == null : this.getUserStatus().equals(other.getUserStatus()))
             && (this.getUserRole() == null ? other.getUserRole() == null : this.getUserRole().equals(other.getUserRole()))
@@ -134,7 +134,7 @@ public class User implements Serializable {
         result = prime * result + ((getUserPassword() == null) ? 0 : getUserPassword().hashCode());
         result = prime * result + ((getPhone() == null) ? 0 : getPhone().hashCode());
         result = prime * result + ((getEmail() == null) ? 0 : getEmail().hashCode());
-        result = prime * result + ((getProfile() == null) ? 0 : getProfile().hashCode());
+        result = prime * result + ((getUserProfile() == null) ? 0 : getUserProfile().hashCode());
         result = prime * result + ((getTagNames() == null) ? 0 : getTagNames().hashCode());
         result = prime * result + ((getUserStatus() == null) ? 0 : getUserStatus().hashCode());
         result = prime * result + ((getUserRole() == null) ? 0 : getUserRole().hashCode());
@@ -158,7 +158,7 @@ public class User implements Serializable {
         sb.append(", userPassword=").append(userPassword);
         sb.append(", phone=").append(phone);
         sb.append(", email=").append(email);
-        sb.append(", profile=").append(profile);
+        sb.append(", userProfile=").append(userProfile);
         sb.append(", tagNames=").append(tagNames);
         sb.append(", userStatus=").append(userStatus);
         sb.append(", userRole=").append(userRole);

@@ -20,12 +20,12 @@ public class UserTeam implements Serializable {
     private Long id;
 
     /**
-     * 用户id
+     * 用户 id
      */
     private Long userId;
 
     /**
-     * 队伍id
+     * 队伍 id
      */
     private Long teamId;
 
