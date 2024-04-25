@@ -68,10 +68,10 @@ public interface TeamService extends IService<Team> {
     boolean deleteTeam(TeamDeleteRequest teamDeleteRequest, User loginUser);
 
     /**
-     * 查看指定队伍
+     * 根据 id 查询队伍
      *
      * @param teamId 队伍 id
-     * @return 指定队伍信息
+     * @return 队伍信息
      */
-    TeamUserVO showTeamDetail(Long teamId);
+    TeamUserVO getTeamById(Long teamId);
 }

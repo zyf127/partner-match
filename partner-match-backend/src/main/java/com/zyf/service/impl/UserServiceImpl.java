@@ -12,6 +12,8 @@ import com.zyf.exception.BusinessException;
 import com.zyf.mapper.UserMapper;
 import com.zyf.model.vo.TeamUserVO;
 import com.zyf.service.UserService;
+import com.zyf.utils.AlgorithmUtils;
+import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -23,12 +25,12 @@ import org.springframework.util.DigestUtils;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.zyf.constant.UserConstant.USER_LOGIN_STATE;
 
@@ -247,12 +249,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (userPage == null) {
            // 如果没有缓存，查数据库
             userPage = this.page(new Page<>(pageNum, pageSize));
-
-            try {
-                valueOperations.set(redisKey, userPage, 30000, TimeUnit.MILLISECONDS);
-            } catch (Exception e) {
-                log.error("redis set key error");
-            }
+        }
+        try {
+            valueOperations.set(redisKey, userPage, 30000, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            log.error("redis set key error");
         }
         List<User> userList = userPage.getRecords();
         return userList.stream().map((user) -> this.getSafetyUser(user)).collect(Collectors.toList());
@@ -277,6 +278,78 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             return false;
         }
         return true;
+    }
+
+    @Override
+    public List<User> matchUsers(long num, User loginUser) {
+        // 1. 条件判断
+        if (num < 1 || num > 20) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "匹配数量不符合要求");
+        }
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN, "请先登录账号");
+        }
+        Long loginUserId = loginUser.getId();
+        String redisKey = String.format("partner-match:user:match:%s", loginUserId);
+        ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
+        // 如果有缓存，直接读缓存
+        List<User> finalUserList = (List<User>) valueOperations.get(redisKey);
+        if (finalUserList == null) {
+            // 如果没有缓存，查数据库
+            String loginUserTagNames = loginUser.getTagNames();
+            if (loginUserTagNames == null) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "请先设置标签");
+            }
+            Gson gson = new Gson();
+            List<String> loginUserTagList = gson.fromJson(loginUserTagNames, new TypeToken<List<String>>() {
+            }.getType());
+
+            // 2. 查询数据库中有标签的用户
+            QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+            queryWrapper.select("id", "tag_names");
+            queryWrapper.ne("id", loginUserId);
+            queryWrapper.isNotNull("tag_names");
+            List<User> userList = this.list(queryWrapper);
+
+            // 3. 筛选出标签最相似的 num 个 用户
+            PriorityQueue<Pair<Long, Integer>> priorityQueue = new PriorityQueue<>((int)num, (p1, p2) -> p2.getValue() - p1.getValue());
+            for (int i = 0; i < userList.size(); i++) {
+                User user = userList.get(i);
+                String tagNames = user.getTagNames();
+                List<String> tagList = gson.fromJson(tagNames, new TypeToken<List<String>>() {
+                }.getType());
+                int similarity = AlgorithmUtils.minDistance(loginUserTagList, tagList);
+                if (priorityQueue.size() < num) {
+                    priorityQueue.add(new Pair<>(user.getId(), similarity));
+                } else {
+                    if (similarity < priorityQueue.peek().getValue()) {
+                        priorityQueue.poll();
+                        priorityQueue.add(new Pair<>(user.getId(), similarity));
+                    }
+                }
+            }
+            List<Long> userIdList = new ArrayList<>();
+            while (!priorityQueue.isEmpty()) {
+                userIdList.add(priorityQueue.poll().getKey());
+            }
+
+            queryWrapper = new QueryWrapper<>();
+            queryWrapper.in("id", userIdList);
+            Map<Long, List<User>> userIdUserListMap = this.list(queryWrapper)
+                    .stream()
+                    .map(this::getSafetyUser)
+                    .collect(Collectors.groupingBy(User::getId));
+            finalUserList = new ArrayList<>();
+            for (int i = userIdList.size() - 1; i >= 0; i--) {
+                finalUserList.add(userIdUserListMap.get(userIdList.get(i)).get(0));
+            }
+        }
+        try {
+            valueOperations.set(redisKey, finalUserList, 30000, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            log.error("redis set key error");
+        }
+        return finalUserList;
     }
 
     /**

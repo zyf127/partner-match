@@ -112,17 +112,17 @@ public class TeamController {
     }
 
     /**
-     * 查看指定队伍
+     * 根据 id 查询队伍
      *
      * @param teamId 队伍 id
-     * @return 指定队伍信息
+     * @return 队伍信息
      */
-    @GetMapping("/detail")
-    public BaseResponse<TeamUserVO> showTeamDetail(Long teamId) {
+    @GetMapping("/get")
+    public BaseResponse<TeamUserVO> getTeamById(Long teamId) {
         if (teamId == null || teamId <= 0) {
             throw new BusinessException(ErrorCode.NULL_ERROR, "队伍不存在");
         }
-        TeamUserVO teamUserVO = teamService.showTeamDetail(teamId);
+        TeamUserVO teamUserVO = teamService.getTeamById(teamId);
         return ResultUtils.success(teamUserVO);
     }
 

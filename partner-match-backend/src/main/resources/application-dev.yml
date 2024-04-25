@@ -26,7 +26,7 @@ server:
 knife4j:
   enable: true
   openapi:
-    title: 伙伴匹配系统
+    title: 挚友阁-伙伴匹配系统
     description: 伙伴匹配系统接口文档
     email: zyf19863@163.com
     concat: zyf
@@ -34,7 +34,8 @@ knife4j:
     version: v4.0
     group:
       userTest:
-        group-name: 用户接口
+        group-name: 接口
         api-rule: package
         api-rule-resources:
           - com.zyf.controller
+

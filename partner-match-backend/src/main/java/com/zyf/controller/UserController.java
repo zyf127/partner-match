@@ -207,4 +207,24 @@ public class UserController {
         }
         return userService.isAdmin(loginUser);
     }
+
+    /**
+     * 根据标签匹配用户
+     *
+     * @param num 匹配的用户数量
+     * @param request
+     * @return 匹配到的用户
+     */
+    @GetMapping("/match")
+    public BaseResponse<List<User>> matchUsers(long num, HttpServletRequest request) {
+        if (num < 1 || num > 20) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "匹配数量不符合要求");
+        }
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN, "请先登录账号");
+        }
+        List<User> userList = userService.matchUsers(num, loginUser);
+        return ResultUtils.success(userList);
+    }
 }

@@ -97,4 +97,13 @@ public interface UserService extends IService<User> {
      * @return 是否为管理员
      */
     boolean isAdmin(User loginUser);
+
+    /**
+     * 根据标签匹配用户
+     *
+     * @param num 匹配的用户数量
+     * @param loginUser 当前登录的用户
+     * @return 匹配到的用户
+     */
+    List<User> matchUsers(long num, User loginUser);
 }
