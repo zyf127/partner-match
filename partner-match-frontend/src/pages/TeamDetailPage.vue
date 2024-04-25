@@ -1,5 +1,5 @@
 <template>
-  <template v-if="team">
+  <div v-if="team.id">
     <div class="center">
       <img :alt="team.teamName" class="img" :src="defaultAvatar">
     </div>
@@ -10,26 +10,37 @@
     <van-cell title="队长" :value="team.userList[0].username"/>
     <van-divider :style="{ color: '#1989fa', borderColor: '#1989fa', padding: '0 16px' }">队员</van-divider>
     <UserCardList :user-list="team.userList"/>
-  </template>
+  </div>
 </template>
 
 <script setup lang="ts">
-import {reactive} from "vue";
 import {useRoute} from "vue-router";
-import defaultAvatar from "../assets/defaultAvatar.png";
-import UserCardList from "../components/UserCardList.vue";
 import {TeamType} from "../models/team";
-import {onMounted} from "vue";
+import {onMounted, ref} from "vue";
+import myAxios from "../plugins/myAxios";
+import {showFailToast} from "vant";
+import defaultAvatar from "../assets/defaultAvatar.png"
 
 const route = useRoute();
-const team: TeamType = reactive(JSON.parse(decodeURIComponent(route.query.teamString)));
+const teamId = route.query.teamId;
+let team = ref<TeamType>({})
 
-onMounted(() => {
-  team.userList.forEach(user => {
-    if (user.tagNames) {
-      user.tagNames = JSON.parse(user.tagNames);
+onMounted(async () => {
+  const res = await myAxios.get('/team/get', {
+    params: {
+      teamId
     }
   });
+  if (res['code'] === 0) {
+    team.value = res.data;
+    team.value.userList.forEach(user => {
+      if (user.tagNames) {
+        user.tagNames = JSON.parse(user.tagNames);
+      }
+    });
+  } else {
+    showFailToast('查看失败');
+  }
 })
 
 </script>

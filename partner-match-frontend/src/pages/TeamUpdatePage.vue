@@ -1,5 +1,5 @@
 <template>
-  <div id="teamAddPage">
+  <div id="teamUpdatePage">
     <van-form @submit="onSubmit">
       <van-cell-group inset>
         <van-field
@@ -17,11 +17,6 @@
             placeholder="请输入队伍描述"
             :rules="[{validator: value => value.length <= 512, message: '队伍描述不超过 512 个字符'}]"
         />
-        <van-field name="stepper" label="最大人数">
-          <template #input>
-            <van-stepper v-model="teamData.maxNum" label="队伍名" min="2" max="20"/>
-          </template>
-        </van-field>
         <van-field
             v-model="showDateTime"
             is-link
@@ -75,56 +70,62 @@
 </template>
 
 <script setup lang="ts">
-  import {ref} from 'vue'
-  import {useRouter} from "vue-router";
-  import myAxios from "../plugins/myAxios";
-  import {showFailToast, showSuccessToast} from "vant";
-  import {formatDateTime} from "../services/team.ts";
+import {onMounted, ref} from 'vue'
+import {useRoute, useRouter} from "vue-router";
+import myAxios from "../plugins/myAxios";
+import {showFailToast, showSuccessToast} from "vant";
+import {formatDateTime} from "../services/team.ts";
 
 
-  const router = useRouter();
+const router = useRouter();
+const route = useRoute();
+const teamId = route.query.teamId;
+const teamData = ref({});
 
-  const initTeamData = {
-    "teamName": "",
-    "teamDescription": "",
-    "maxNum": 2,
-    "expireTime": "",
-    "teamStatus": "0",
-    "teamPassword": ""
-  }
+const nowDate = new Date();
+const expireDate = ref(['', '', '']);
+const expireTime = ref(['', '']);
+const showPicker = ref(false);
+const showDateTime = ref('');
 
-  const teamData = ref({...initTeamData});
-
-  const nowDate = new Date();
-  const expireDate = ref(['', '', '']);
-  const expireTime = ref(['', '']);
-  const showPicker = ref(false);
-  const showDateTime = ref('');
-
-  const onConfirm = () => {
-    teamData.value.expireTime =  `${expireDate.value.join('-')} ${expireTime.value.join(':')}`;
+onMounted(async () => {
+  const res = await myAxios.get('/team/get', {
+    params: {
+      teamId
+    }
+  });
+  if (res['code'] === 0) {
+    teamData.value = res.data;
+    teamData.value.teamStatus = String(teamData.value.teamStatus);
     showDateTime.value = formatDateTime(teamData.value.expireTime);
-    showPicker.value = false;
+  } else {
+    showFailToast('加载失败');
+    router.back();
+  }
+})
+
+const onConfirm = () => {
+  teamData.value.expireTime =  `${expireDate.value.join('-')} ${expireTime.value.join(':')}`;
+  showDateTime.value = formatDateTime(teamData.value.expireTime);
+  showPicker.value = false;
+};
+
+const onSubmit = async () => {
+  let teamPostData = {
+    ...teamData.value,
+    teamId: teamData.value.id,
+    teamStatus: Number(teamData.value.teamStatus),
+    expireTime: new Date(teamData.value.expireTime),
   };
 
-  const onSubmit = async () => {
-    let teamPostData = {
-      ...teamData.value,
-      teamStatus: Number(teamData.value.teamStatus),
-      expireTime: new Date(teamData.value.expireTime)
-    };
-
-    const res = await myAxios.post('/team/add', teamPostData);
-    if (res['code'] === 0 && res.data) {
-      showSuccessToast('添加成功');
-      router.push({
-        path: '/team',
-        replace: true
-      })
-    } else {
-      showFailToast('添加失败');
-    }
+  const res = await myAxios.post('/team/update', teamPostData);
+  if (res['code'] === 0 && res.data) {
+    showSuccessToast('更新成功');
+    router.back();
+  } else {
+    showFailToast('更新失败');
   }
+}
 </script>
 
 <style scoped>

@@ -19,6 +19,7 @@ myAxios.interceptors.request.use(function (config) {
 
 // 添加响应拦截器
 myAxios.interceptors.response.use(function (response) {
+    console.log('我收到你的相应啦', response.data);
     // 对响应数据做点什么
     return response.data;
 }, function (error) {

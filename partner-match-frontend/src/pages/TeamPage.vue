@@ -1,7 +1,7 @@
 <template>
-  <div id="teamPage">
-    <van-button type="primary" @click="doAddTeam">创建队伍</van-button>
+  <div id="teamPage" style="padding-bottom: 50px;">
     <TeamCardList/>
+    <van-button type="primary" @click="doAddTeam" icon="plus" class="add-button" />
   </div>
 </template>
 

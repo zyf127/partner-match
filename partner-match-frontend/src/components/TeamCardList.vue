@@ -45,7 +45,7 @@
       <template #footer>
         <span v-if="hasJoinTeam(team)">
             <van-popover v-if="team.userList[0].id === currentUser.id" v-model="showPopover" placement="top" style="--van-popover-light-background: rgba(255, 255, 255, 0)">
-                <van-button size="small" type="primary" plain @click="updateTeam(team.id)" style="margin-left: 2px; margin-right: 5px;">更新队伍</van-button>
+                <van-button size="small" type="primary" plain @click="toUpdateTeamPage(team.id)" style="margin-left: 2px; margin-right: 5px;">更新队伍</van-button>
                 <van-button size="small" type="danger" plain @click="quitTeam(team.id)" style="margin-left: 5px; margin-right: 5px;">退出队伍</van-button>
                 <van-button size="small" type="danger" plain @click="deleteTeam(team.id)" style="margin-left: 5px; margin-right: 2px;">解散队伍</van-button>
               <template #reference>
@@ -68,6 +68,7 @@
       />
     </van-dialog>
   </div>
+  <van-empty v-if="!teamList || teamList.length < 1" description="数据为空" />
 </template>
 
 <script setup lang="ts">
@@ -95,7 +96,7 @@ const teamJoinRequest = ref({
   teamPassword: ''
 });
 
-const activeName = ref(0);
+const activeName = ref(Number(sessionStorage.getItem('activeName')));
 
 let filteredTeamList: TeamType[] = ref([]);
 
@@ -125,7 +126,7 @@ const joinTeamPost = async () => {
   });
   if (res['code'] === 0) {
     showSuccessToast('加入成功');
-    queryData();
+    await queryData();
   } else {
     showFailToast(res['description']);
   }
@@ -211,25 +212,26 @@ const deleteTeam = async (teamId) => {
   showPopover.value = false;
 }
 
-const showTeamDetail = async (teamId) => {
-  const res = await myAxios.get('/team/detail', {
-    params: {
+const showTeamDetail = (teamId) => {
+  sessionStorage.setItem('activeName', activeName.value);
+  router.push({
+    path: '/team/detail',
+    query: {
       teamId
     }
   });
-  if (res['code'] === 0) {
-    const team = res.data;
-    console.log(team)
-    router.push({
-      path: '/team/detail',
-      query: {
-        teamString: encodeURIComponent(JSON.stringify(team))
-      }
-    });
-  } else {
-   showFailToast('查看失败');
-  }
 }
+
+const toUpdateTeamPage = (teamId) => {
+  sessionStorage.setItem('activeName', activeName.value);
+  router.push({
+    path: '/team/update',
+    query: {
+      teamId
+    }
+  })
+}
+
 </script>
 
 <style scoped>
