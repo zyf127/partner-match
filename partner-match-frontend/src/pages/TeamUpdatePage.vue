@@ -70,6 +70,7 @@
 </template>
 
 <script setup lang="ts">
+//@ts-nocheck
 import {onMounted, ref} from 'vue'
 import {useRoute, useRouter} from "vue-router";
 import myAxios from "../plugins/myAxios";

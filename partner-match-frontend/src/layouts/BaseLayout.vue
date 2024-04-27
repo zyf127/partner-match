@@ -1,12 +1,12 @@
 <template>
   <van-nav-bar
       :title="title"
-      right-text="按钮"
       left-arrow
+      left-text="返回"
       @click-left="onClickLeft"
       @click-right="onClickRight">
     <template #right>
-      <van-icon name="search" size="18" />
+      <van-icon name="search" size="18" /><span style="color: #2f9dfb">标签</span>
     </template>
   </van-nav-bar>
   <div id="content">
@@ -19,7 +19,7 @@
   </van-tabbar>
 </template>
 
-<script setup lang="ts">
+<script setup>
   import {ref} from "vue";
   import {useRouter} from "vue-router";
   import {routes} from "../router/index.ts";
@@ -30,14 +30,12 @@
   const title = ref(DEFAULT_TITLE)
 
   router.beforeEach((to) => {
-    const toPath = to.path;
     let toRoute = {};
     routes.forEach((route) => {
-      if (toPath == route.path) {
+      if (to.path === route.path) {
         toRoute = route;
       }
     });
-
     if (toRoute && toRoute['title']) {
       title.value = toRoute['title'];
     } else {

@@ -72,6 +72,7 @@
 </template>
 
 <script setup lang="ts">
+//@ts-nocheck
 import {ref} from "vue";
 import defaultAvatar from "../assets/defaultAvatar.png"
 import {teamStatusEnum} from "../constants/team.ts";

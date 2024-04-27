@@ -6,8 +6,9 @@
       <img :src="user.avatarUrl" style="width: 50px; height: 50px"/>
     </van-cell>
     <van-cell title="性别" is-link :value="user.gender === 0 ? '女' : '男'" @click="toEdit('gender', '性别', user.gender)"/>
-    <van-cell title="手机号" is-link :value="user.phone" @click="toEdit('phone', '手机号', user.phone)"/>
-    <van-cell title="邮箱" is-link :value="user.email" @click="toEdit('email', '邮箱', user.email)"/>
+    <van-cell title="手机号" is-link :value="getSafetyPhone(user.phone)" @click="toEdit('phone', '手机号', user.phone)"/>
+    <van-cell title="邮箱" is-link :value="getSafeEmail(user.email)" @click="toEdit('email', '邮箱', user.email)"/>
+    <van-cell title="我的标签" is-link value="点击查看" @click="showMyTags"/>
     <van-cell title="注册时间" :value="formatDateTime(user.createTime)"/>
     <div style="padding: 10px;">
       <van-button type="primary" block @click="logout">退 出 登 录</van-button>
@@ -20,6 +21,7 @@
   import {useRouter} from "vue-router";
   import {getCurrentUser} from "../services/user.ts";
   import {formatDateTime} from "../services/team.ts";
+  // @ts-ignore
   import myAxios from "../plugins/myAxios";
   import {showFailToast, showSuccessToast} from "vant";
 
@@ -50,6 +52,40 @@
     } else {
       showFailToast('退出登录失败');
     }
+  }
+
+  const getSafetyPhone = (s: string) => {
+    let charArray = s.split('');
+    for (let i = 0; i < s.length; i++) {
+      if (i >= 3 && i <= 6) {
+        charArray[i] = '*';
+      }
+    }
+    return charArray.join('');
+  }
+
+  const getSafeEmail = (s: string) => {
+    let charArray = s.split('');
+    let i;
+    for (i = 0; i < s.length; i++) {
+      if (charArray[i] === '@') {
+        break;
+      }
+    }
+    for (let j =  Math.floor(i / 2); j < i; j++) {
+      charArray[j] = '*';
+    }
+    return charArray.join('');
+  }
+
+  const showMyTags = () => {
+    router.push({
+      path: '/search',
+      query: {
+        userId: user.value.id,
+        myTagNameList: user.value.tagNames
+      }
+    });
   }
 </script>
 

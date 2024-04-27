@@ -1,8 +1,10 @@
 // 创建实例时配置默认值
 import axios from "axios";
 
-export const myAxios = axios.create({
-    baseURL: 'http://localhost:8080/api'
+const isDev = process.env.NODE_ENV === 'development';
+
+const myAxios = axios.create({
+    baseURL: isDev ? 'http://localhost:8080/api' : 'https://zhiyouge.top'
 });
 
 // 进行跨域请求时能够携带跨域请求中的凭据信息
@@ -19,7 +21,7 @@ myAxios.interceptors.request.use(function (config) {
 
 // 添加响应拦截器
 myAxios.interceptors.response.use(function (response) {
-    console.log('我收到你的相应啦', response.data);
+    console.log('我收到你的响应啦', response.data);
     // 对响应数据做点什么
     return response.data;
 }, function (error) {

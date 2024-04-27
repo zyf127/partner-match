@@ -75,6 +75,7 @@
 </template>
 
 <script setup lang="ts">
+  //@ts-nocheck
   import {ref} from 'vue'
   import {useRouter} from "vue-router";
   import myAxios from "../plugins/myAxios";

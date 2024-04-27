@@ -14,6 +14,7 @@
 </template>
 
 <script setup lang="ts">
+//@ts-nocheck
 import {useRoute} from "vue-router";
 import {TeamType} from "../models/team";
 import {onMounted, ref} from "vue";

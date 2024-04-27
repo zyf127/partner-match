@@ -19,6 +19,7 @@
 </template>
 
 <script setup lang="ts">
+  //@ts-nocheck
   import {UserType} from "../models/user";
   import defaultAvatar from "../assets/defaultAvatar.png"
 

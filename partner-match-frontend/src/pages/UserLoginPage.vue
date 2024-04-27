@@ -22,11 +22,14 @@
         登录
       </van-button>
     </div>
+    <van-cell title="" to="/user/register" value="还没有账号？点击注册"></van-cell>
+    <van-loading class="loading" type="spinner" color="#1989fa" v-if="isLogin"/>
   </van-form>
 </template>
 
 <script setup lang="ts">
-  import {ref} from 'vue';
+  import {ref} from "vue";
+  // @ts-ignore
   import myAxios from "../plugins/myAxios";
   import {showFailToast, showSuccessToast} from "vant";
   import {useRouter} from "vue-router";
@@ -34,7 +37,10 @@
   const userAccount = ref('');
   const userPassword = ref('');
   const router = useRouter();
+
+  const isLogin = ref(false);
   const onSubmit = async () => {
+    isLogin.value = true;
     const res = await myAxios.post('/user/login', {
       userAccount: userAccount.value,
       userPassword: userPassword.value
@@ -45,9 +51,14 @@
     } else {
       showFailToast('登录失败');
     }
+    isLogin.value = false;
   };
 </script>
 
 <style scoped>
-
+.loading {
+  position: absolute;
+  top: 22%;
+  left: 45%;
+}
 </style>

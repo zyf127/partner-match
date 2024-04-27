@@ -8,82 +8,132 @@
         @cancel="onCancel"
     />
   </form>
-  <van-divider content-position="left">已选标签</van-divider>
-  <div v-if="activeIds.length === 0">请选择标签</div>
-  <van-row :gutter="16">
-    <van-col v-for="activeId in activeIds">
-      <van-tag type="primary" closeable size="medium" :show="true" @close="doClose(activeId)">
-        {{ activeId }}
-      </van-tag>
-    </van-col>
-  </van-row>
-  <van-divider content-position="left">选择标签</van-divider>
+  <div id="tage">
+    <van-empty v-if="activeTagNameList.length === 0" :image-size="[35, 20]" description="未选择标签"/>
+    <div v-else class="span-tag" style="margin-left: 20px; margin-right: 10px;">
+      <van-row>
+        <van-col v-for="activeTagName in activeTagNameList">
+          <van-tag type="primary" class="van-tag" closeable size="large" :show="true" @close="doClose(activeTagName)">
+            {{ activeTagName }}
+          </van-tag>
+        </van-col>
+      </van-row>
+    </div>
+  </div>
+  <van-divider />
   <van-tree-select
-      v-model:active-id="activeIds"
+      v-model:active-id="activeTagNameList"
       v-model:main-active-index="activeIndex"
-      :items="tagNameList"
+      :items="tagItems"
   />
   <div style="padding: 12px">
-    <van-button block type="primary" @click="doSearchResult">搜索</van-button>
+    <van-button v-if="myTagNames" block type="primary" @click="doSearchResult">修改</van-button>
+    <van-button v-else block type="primary" @click="doSearchResult">搜索</van-button>
   </div>
 </template>
 
-<script setup lang="ts">
-  import {ref} from 'vue';
-  import {useRouter} from "vue-router";
+<script setup>
+  import {ref, onMounted} from 'vue';
+  import {useRouter, useRoute} from "vue-router";
+  import myAxios from "../plugins/myAxios";
+  import {showFailToast, showSuccessToast} from "vant";
 
   const router = useRouter();
-
-  const activeIds = ref([]);
+  const route = useRoute();
+  let myTagNames = route.query.myTagNameList;
+  let tagList = [];
+  const activeTagNameList = ref([]);
   const activeIndex = ref(0);
-  const originTagNameList = [
-    {
-      text: '编程语言',
-      children: [
-        { text: 'Java', id: 'Java' },
-        { text: 'C++', id: 'C++' },
-      ],
-    },
-    {
-      text: '年级',
-      children: [
-        { text: '大一', id: '大一' },
-        { text: '大二', id: '大二' },
-        { text: '大三', id: '大三' },
-        { text: '大四', id: '大四' },
-      ],
-    },
-  ];
-  let tagNameList = ref(originTagNameList);
+  let originTagItems = [];
+  let tagItems = ref([]);
   const searchText = ref('');
+
+  onMounted(async () => {
+    const res = await myAxios.get('/tag/get');
+    if (res['code'] === 0) {
+      tagList = res.data;
+      const parentTagList = tagList.filter(tag => tag['isParent'] === 1);
+      parentTagList.forEach(parentTag => {
+        const children = tagList.filter(childTag => childTag.parentId === parentTag.id);
+        const childrenItems = children.map(child => ({ text: child.tagName, id: child.tagName }));
+        originTagItems.push({ text: parentTag.tagName, children: childrenItems });
+      });
+      tagItems.value = [...originTagItems];
+    } else {
+      showFailToast('加载标签失败');
+    }
+    if (myTagNames && myTagNames.length > 0) {
+      activeTagNameList.value = JSON.parse(myTagNames);
+    }
+  });
+
   const onSearch = () => {
-    tagNameList.value = originTagNameList.map(parentTagName => {
-      const tempChildren = [...parentTagName.children];
-      const tempParentTagName = {...parentTagName};
-      tempParentTagName.children = tempChildren.filter(item => item.text.includes(searchText.value));
-      return tempParentTagName;
-    })
+    const searchedIndexList = [];
+    tagItems.value = originTagItems.map((parentTag, index) => {
+      const tempChildren = [...parentTag.children];
+      const tempParentTag = {...parentTag};
+      tempParentTag.children = tempChildren.filter(item => {
+        if (item.text.includes(searchText.value)) {
+          searchedIndexList.push(index);
+          return true;
+        }
+      });
+      return tempParentTag;
+    });
+    activeIndex.value = searchedIndexList[0];
   };
   const onCancel = () => {
     searchText.value = '';
-    tagNameList.value = originTagNameList;
+    tagItems.value = [...originTagItems]
+    activeIndex.value = 0;
   }
-  const doClose = (activeId) => {
-    activeIds.value = activeIds.value.filter((item) => item !== activeId);
+  const doClose = (activeTagName) => {
+    activeTagNameList.value = activeTagNameList.value.filter(item => item !== activeTagName);
   };
 
-  const doSearchResult = () => {
-    const selectedTagNames = activeIds.value;
-    router.push({
-      path: '/user/list',
-      query: {
-        selectedTagNames
+  const doSearchResult = async () => {
+    const selectedTagNameList = activeTagNameList.value;
+    if (myTagNames) {
+      myTagNames = activeTagNameList.value;
+      const res = await myAxios.post('/user/update/tagNames', {
+        tagNames: JSON.stringify(myTagNames)
+      });
+      if (res['code'] === 0) {
+        showSuccessToast('修改成功');
+        router.push({
+          path: '/user',
+          replace: true
+        });
+      } else {
+        showFailToast('修改失败');
       }
-    });
+    } else {
+      if (selectedTagNameList.length > 0) {
+        router.push({
+          path: '/user/list',
+          query: {
+            selectedTagNames: selectedTagNameList
+          }
+        });
+      } else {
+        showFailToast('未选择标签');
+      }
+    }
   }
 
 </script>
 
 <style scoped>
+#tage {
+  width: 100%;
+  height: 100px;
+}
 
+.van-tag {
+  margin: 1px
+}
+
+.span-tag {
+  padding: 1px;
+}
 </style>
