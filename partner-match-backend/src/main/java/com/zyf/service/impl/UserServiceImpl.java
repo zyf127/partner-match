@@ -10,7 +10,6 @@ import com.zyf.constant.UserConstant;
 import com.zyf.model.domain.User;
 import com.zyf.exception.BusinessException;
 import com.zyf.mapper.UserMapper;
-import com.zyf.model.vo.TeamUserVO;
 import com.zyf.service.UserService;
 import com.zyf.utils.AlgorithmUtils;
 import javafx.util.Pair;
@@ -30,7 +29,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.zyf.constant.UserConstant.USER_LOGIN_STATE;
 
@@ -66,10 +64,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     private RedisTemplate redisTemplate;
 
     @Override
-    public long userRegister(String userAccount, String userPassword, String checkPassword) {
+    public long userRegister(String username, String userAccount, String userPassword, String checkPassword) {
         // 1. 校验
-        if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
+        if (StringUtils.isAnyBlank(username, userAccount, userPassword, checkPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
+        }
+        if (username.isEmpty()) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户昵称过短");
         }
         if (userAccount.length() < 4) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户账号过短");
@@ -86,17 +87,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (!userPassword.equals(checkPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码和校验密码不一致");
         }
-        // 账号不能重复
+        // 昵称和账号不能重复
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("username", username);
         queryWrapper.eq("user_account", userAccount);
         int count = userMapper.selectCount(queryWrapper);
         if (count > 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户账号重复");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "昵称或账号重复");
         }
         // 2. 密码加密
         String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
         // 3. 插入数据
         User user = new User();
+        user.setUsername(username);
         user.setUserAccount(userAccount);
         user.setUserPassword(encryptPassword);
         int saveResult = userMapper.insert(user);
@@ -182,29 +185,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return safetyUser;
     }
 
+
     @Override
     public List<User> searchUsersByTagNames(List<String> tagNameList) {
         if (CollectionUtils.isEmpty(tagNameList)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        // 先查出所有数据，之后在内存中进行过滤
+        // 在数据库中进行条件查询
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        for (String tagName : tagNameList) {
+            queryWrapper.like("tag_names", tagName);
+        }
         List<User> userList = userMapper.selectList(queryWrapper);
-        return userList.stream().filter((user) -> {
-            String tagNameStr = user.getTagNames();
-            if (StringUtils.isBlank(tagNameStr)) {
-                return false;
-            }
-            Gson gson = new Gson();
-            Set<String> tagNameSet = gson.fromJson(tagNameStr, new TypeToken<Set<String>>(){}.getType());
-            for (String tagName : tagNameList) {
-                if (!tagNameSet.contains(tagName)) {
-                    return false;
-                }
-            }
-            return true;
-        }).map(this::getSafetyUser).collect(Collectors.toList());
+        return userList.stream().map(this::getSafetyUser).collect(Collectors.toList());
     }
+
 
     @Override
     public int updateUser(User user, User loginUser) {
@@ -215,7 +210,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (user == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        // TODO 补充校验，如果用户没有传任何要更新的值，就直接报错，不用执行 update 语句
         long userId = user.getId();
 
         // 是否登录
@@ -248,7 +242,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         Page<User> userPage = (Page<User>) valueOperations.get(redisKey);
         if (userPage == null) {
            // 如果没有缓存，查数据库
-            userPage = this.page(new Page<>(pageNum, pageSize));
+            if (loginUser == null) {
+                userPage = this.page(new Page<>(pageNum, pageSize));
+            } else {
+                QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+                queryWrapper.ne("id", loginUser.getId());
+                userPage = this.page(new Page<>(pageNum, pageSize), queryWrapper);
+            }
         }
         try {
             valueOperations.set(redisKey, userPage, 30000, TimeUnit.MILLISECONDS);
@@ -318,7 +318,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
                 String tagNames = user.getTagNames();
                 List<String> tagList = gson.fromJson(tagNames, new TypeToken<List<String>>() {
                 }.getType());
-                int similarity = AlgorithmUtils.minDistance(loginUserTagList, tagList);
+                // 去除两个用户相同的标签
+                List<String> tempLoginUserTagList = loginUserTagList.stream().filter(tag -> !tagList.contains(tag)).collect(Collectors.toList());
+                List<String> tempTagList = tagList.stream().filter(tag -> !loginUserTagList.contains(tag)).collect(Collectors.toList());
+                int similarity = AlgorithmUtils.minDistance(tempLoginUserTagList, tempTagList);
                 if (priorityQueue.size() < num) {
                     priorityQueue.add(new Pair<>(user.getId(), similarity));
                 } else {
@@ -353,23 +356,33 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     /**
-     * 根据标签名称搜索用户（SQL 查询版）
+     * 根据标签名称搜索用户（内存过滤版）
      *
      * @param tagNameList 标签名称列表
      * @return 搜索到的用户
      */
     @Deprecated
-    private List<User> searchUsersByTagNamesBySQL(List<String> tagNameList) {
+    private List<User> searchUsersByTagNamesByMemory(List<String> tagNameList) {
         if (CollectionUtils.isEmpty(tagNameList)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        // 在数据库中进行条件查询
+        // 先查出所有数据，之后在内存中进行过滤
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        for (String tagName : tagNameList) {
-            queryWrapper.like("tag_names", tagName);
-        }
         List<User> userList = userMapper.selectList(queryWrapper);
-        return userList.stream().map(this::getSafetyUser).collect(Collectors.toList());
+        return userList.stream().filter((user) -> {
+            String tagNameStr = user.getTagNames();
+            if (StringUtils.isBlank(tagNameStr)) {
+                return false;
+            }
+            Gson gson = new Gson();
+            Set<String> tagNameSet = gson.fromJson(tagNameStr, new TypeToken<Set<String>>(){}.getType());
+            for (String tagName : tagNameList) {
+                if (!tagNameSet.contains(tagName)) {
+                    return false;
+                }
+            }
+            return true;
+        }).map(this::getSafetyUser).collect(Collectors.toList());
     }
 }
 

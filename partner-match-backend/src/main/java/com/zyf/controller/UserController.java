@@ -2,6 +2,7 @@ package com.zyf.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.zyf.common.BaseResponse;
 import com.zyf.common.ErrorCode;
 import com.zyf.common.ResultUtils;
@@ -9,6 +10,7 @@ import com.zyf.model.domain.User;
 import com.zyf.model.request.UserLoginRequest;
 import com.zyf.model.request.UserRegisterRequest;
 import com.zyf.exception.BusinessException;
+import com.zyf.model.request.UserTagNameUpdateRequest;
 import com.zyf.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
@@ -27,7 +29,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/user")
-@CrossOrigin(origins = {"http://localhost:5173"}, allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"}, allowCredentials = "true")
 public class UserController {
     /**
      * 用户服务
@@ -46,13 +48,14 @@ public class UserController {
         if (userRegisterRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        String username = userRegisterRequest.getUsername();
         String userAccount = userRegisterRequest.getUserAccount();
         String userPassword = userRegisterRequest.getUserPassword();
         String checkPassword = userRegisterRequest.getCheckPassword();
-        if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
+        if (StringUtils.isAnyBlank(username, userAccount, userPassword, checkPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        long result = userService.userRegister(userAccount, userPassword, checkPassword);
+        long result = userService.userRegister(username, userAccount, userPassword, checkPassword);
         return ResultUtils.success(result);
     }
 
@@ -132,7 +135,7 @@ public class UserController {
      * @return 搜索到的用户集合
      */
     @GetMapping("/search/tagNames")
-    public BaseResponse<List<User>> searchUsersByTagNames(@RequestParam(required = false) List<String> tagNameList) {
+    public BaseResponse<List<User>> searchUsersByTagNames(@RequestParam List<String> tagNameList) {
         if (CollectionUtils.isEmpty(tagNameList)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -192,6 +195,33 @@ public class UserController {
         }
         int updateResult = userService.updateUser(user, loginUser);
         return ResultUtils.success(updateResult);
+    }
+
+    /**
+     * 修改用户标签接口
+     *
+     * @param userTagNameUpdateRequest 修改后的标签
+     * @param request
+     * @return 是否修改成功
+     */
+    @PostMapping("/update/tagNames")
+    public BaseResponse<Boolean> updateTagNames(@RequestBody UserTagNameUpdateRequest userTagNameUpdateRequest, HttpServletRequest request) {
+        if (userTagNameUpdateRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        String tagNames = userTagNameUpdateRequest.getTagNames();
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        UpdateWrapper<User> updateWrapper = new UpdateWrapper();
+        updateWrapper.eq("id", loginUser.getId());
+        updateWrapper.set("tag_names", tagNames);
+        boolean result = userService.update(updateWrapper);
+        if (!result) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+        }
+        return ResultUtils.success(true);
     }
 
     /**

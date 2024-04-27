@@ -2,8 +2,6 @@ package com.zyf.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.zyf.model.domain.User;
-import com.zyf.model.request.TeamJoinRequest;
-import com.zyf.model.vo.TeamUserVO;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -15,12 +13,13 @@ public interface UserService extends IService<User> {
     /**
      * 用户注册
      *
+     * @param username 昵称
      * @param userAccount 账号
      * @param userPassword 密码
      * @param checkPassword 检验密码
      * @return 新用户 id
      */
-    long userRegister(String userAccount, String userPassword, String checkPassword);
+    long userRegister(String username, String userAccount, String userPassword, String checkPassword);
 
     /**
      * 用户登录

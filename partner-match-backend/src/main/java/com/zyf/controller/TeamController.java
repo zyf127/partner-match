@@ -26,7 +26,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/team")
-@CrossOrigin(origins = {"http://localhost:5173"}, allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"}, allowCredentials = "true")
 public class TeamController {
     /**
      * 用户服务
