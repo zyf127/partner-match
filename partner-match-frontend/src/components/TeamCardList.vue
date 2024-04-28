@@ -44,12 +44,12 @@
       </template>
       <template #footer>
         <span v-if="hasJoinTeam(team)">
-            <van-popover v-if="team.userList[0].id === currentUser.id" v-model="showPopover" placement="top" style="--van-popover-light-background: rgba(255, 255, 255, 0)">
+            <van-popover v-if="team.userList[0].id === currentUser.id" v-model:show="showPopover[team.id]" placement="top" style="--van-popover-light-background: rgba(255, 255, 255, 0)">
                 <van-button size="small" type="primary" plain @click="toUpdateTeamPage(team.id)" style="margin-left: 2px; margin-right: 5px;">更新队伍</van-button>
                 <van-button size="small" type="danger" plain @click="quitTeam(team.id)" style="margin-left: 5px; margin-right: 5px;">退出队伍</van-button>
                 <van-button size="small" type="danger" plain @click="deleteTeam(team.id)" style="margin-left: 5px; margin-right: 2px;">解散队伍</van-button>
               <template #reference>
-               <van-button type="primary" size="small" plain>...更多操作</van-button>
+               <van-button type="primary" size="small" plain @click="!showPopover[team.id]">...更多操作</van-button>
               </template>
             </van-popover>
             <van-button v-else size="small" type="danger" plain @click="quitTeam(team.id)">退出队伍</van-button>
@@ -103,7 +103,7 @@ let filteredTeamList: TeamType[] = ref([]);
 
 const searchText = ref('');
 
-const showPopover = ref(false);
+const showPopover = ref({});
 
 const joinTeam = async (teamId, teamStatus) => {
   teamJoinRequest.value.teamId = teamId;
@@ -197,7 +197,6 @@ const quitTeam = async (teamId) => {
   } else {
     showFailToast('退出失败');
   }
-  showPopover.value = false;
 }
 
 const deleteTeam = async (teamId) => {
@@ -210,7 +209,6 @@ const deleteTeam = async (teamId) => {
   } else {
     showFailToast('解散失败');
   }
-  showPopover.value = false;
 }
 
 const showTeamDetail = (teamId) => {
@@ -230,7 +228,7 @@ const toUpdateTeamPage = (teamId) => {
     query: {
       teamId
     }
-  })
+  });
 }
 
 </script>
