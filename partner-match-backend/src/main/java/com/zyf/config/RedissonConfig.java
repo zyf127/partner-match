@@ -1,7 +1,5 @@
 package com.zyf.config;
 
-
-import jdk.nashorn.internal.objects.annotations.Property;
 import lombok.Data;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
