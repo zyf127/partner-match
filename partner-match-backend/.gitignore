@@ -31,7 +31,12 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### script ###
 /src/main/java/com/zyf/script/
 
 ### .yml ###
 *.yml
+
+### avatar ###
+/avatar/
