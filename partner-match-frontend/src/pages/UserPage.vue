@@ -1,10 +1,20 @@
 <template>
   <template v-if="user">
+    <div style="text-align: center; padding: 20px;">
+      <van-uploader
+          :before-read="beforeRead" :after-read="afterRead" :max-count="1"
+          :max-size="5 * 1024 * 1024" @oversize="onOversize">
+        <van-image
+            style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);"
+            width="125px"
+            height="125px"
+            :src="user.avatarUrl != null ? `http://localhost:8085/${user.avatarUrl}` : defaultUserAvatar"
+            radius="20%"
+        />
+      </van-uploader>
+    </div>
     <van-cell title="昵称" is-link :value="user.username" @click="toEdit('username', '昵称', user.username)"/>
     <van-cell title="账号" :value="user.userAccount"/>
-    <van-cell title="头像" is-link>
-      <img :src="user.avatarUrl" style="width: 50px; height: 50px"/>
-    </van-cell>
     <van-cell title="性别" is-link :value="user.gender === 0 ? '女' : '男'" @click="toEdit('gender', '性别', user.gender)"/>
     <van-cell title="手机号" is-link :value="getSafetyPhone(user.phone)" @click="toEdit('phone', '手机号', user.phone)"/>
     <van-cell title="邮箱" is-link :value="getSafeEmail(user.email)" @click="toEdit('email', '邮箱', user.email)"/>
@@ -24,6 +34,7 @@
   // @ts-ignore
   import myAxios from "../plugins/myAxios";
   import {showFailToast, showSuccessToast} from "vant";
+  import defaultUserAvatar from "../assets/defaultUserAvatar.jpg"
 
   const router = useRouter();
   const user = ref();
@@ -86,6 +97,30 @@
         myTagNameList: user.value.tagNames
       }
     });
+  }
+
+  const beforeRead = (file: any) => {
+    if (file.type === '') {
+      showFailToast('请上传图片');
+      return false;
+    }
+    return true;
+  };
+
+
+  const afterRead = async (file: any) => {
+    const formData = new FormData();
+    formData.append('avatarFile', file.file);
+    const res = await myAxios.post('/user/avatar', formData);
+    if (res.code === 0) {
+      location.reload();
+    } else {
+      showFailToast('更换头像失败');
+    }
+  }
+
+  const onOversize = () => {
+    showFailToast('头像大小不能超过 5MB');
   }
 </script>
 
