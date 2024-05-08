@@ -34,7 +34,7 @@
     <van-card v-for="team in filteredTeamList"
               :title="team.teamName"
               :desc="team.teamDescription"
-              :thumb="defaultAvatar">
+              :thumb="team.avatarUrl != null ? `http://localhost:8085/${team.avatarUrl}` : defaultTeamAvatar">
       <template #tags>
         <van-tag plain type="primary" style="margin-right: 12px; margin-top: 5px">{{ teamStatusEnum[team.teamStatus] }}</van-tag>
         <van-tag plain type="warning" style="margin-right: 12px; margin-top: 5px">队长：{{team.userList[0].username}}</van-tag>
@@ -74,7 +74,7 @@
 <script setup lang="ts">
 //@ts-nocheck
 import {ref} from "vue";
-import defaultAvatar from "../assets/defaultAvatar.png"
+import defaultTeamAvatar from "../assets/defaultTeamAvatar.png"
 import {teamStatusEnum} from "../constants/team.ts";
 import myAxios from "../plugins/myAxios";
 import {showConfirmDialog, showFailToast, showSuccessToast} from "vant";

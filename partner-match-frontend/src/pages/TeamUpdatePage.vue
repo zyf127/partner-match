@@ -1,5 +1,19 @@
 <template>
   <div id="teamUpdatePage">
+    <div style="text-align: center; padding: 20px;">
+      <van-uploader
+          :before-read="beforeRead" :after-read="afterRead" :max-count="1"
+          :max-size="5 * 1024 * 1024" @oversize="onOversize" image-fit="fill">
+        <van-image
+            style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);"
+            width="125px"
+            height="125px"
+            :src="teamData.avatarUrl != null ? `http://localhost:8085/${teamData.avatarUrl}` : defaultTeamUrl"
+            radius="20%"
+            fit="cover"
+        />
+      </van-uploader>
+    </div>
     <van-form @submit="onSubmit">
       <van-cell-group inset>
         <van-field
@@ -76,6 +90,7 @@ import {useRoute, useRouter} from "vue-router";
 import myAxios from "../plugins/myAxios";
 import {showFailToast, showSuccessToast} from "vant";
 import {formatDateTime} from "../services/team.ts";
+import defaultTeamUrl from "../assets/defaultTeamAvatar.png";
 
 
 const router = useRouter();
@@ -126,6 +141,30 @@ const onSubmit = async () => {
   } else {
     showFailToast('更新失败');
   }
+}
+
+const beforeRead = (file: any) => {
+  if (file.type === '') {
+    showFailToast('请上传图片');
+    return false;
+  }
+  return true;
+};
+
+const afterRead = async (file: any) => {
+  const formData = new FormData();
+  formData.append('avatarFile', file.file);
+  formData.append('teamId', teamId);
+  const res = await myAxios.post('/team/avatar', formData);
+  if (res.code === 0) {
+    location.reload();
+  } else {
+    showFailToast('更换头像失败');
+  }
+}
+
+const onOversize = () => {
+  showFailToast('头像大小不能超过 5MB');
 }
 </script>
 

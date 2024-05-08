@@ -1,7 +1,14 @@
 <template>
   <div v-if="team.id">
-    <div class="center">
-      <img :alt="team.teamName" class="img" :src="defaultAvatar">
+    <div style="text-align: center; padding: 20px;">
+      <van-image
+          style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);"
+          width="125px"
+          height="125px"
+          :src="team.avatarUrl != null ? `http://localhost:8085/${team.avatarUrl}` : defaultTeamAvatar"
+          radius="20%"
+          fit="cover"
+      />
     </div>
     <van-divider>{{ team.teamName }}</van-divider>
     <van-cell title="队伍名" :value="team.teamName"/>
@@ -20,7 +27,7 @@ import {TeamType} from "../models/team";
 import {onMounted, ref} from "vue";
 import myAxios from "../plugins/myAxios";
 import {showFailToast} from "vant";
-import defaultAvatar from "../assets/defaultAvatar.png"
+import defaultTeamAvatar from "../assets/defaultTeamAvatar.png"
 
 const route = useRoute();
 const teamId = route.query.teamId;
@@ -47,17 +54,5 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.img {
-  box-shadow: 0 0 14px rgba(0, 0, 0, 0.5);
-  border-radius: 10%;
-  height: 135px;
-  width: 135px;
-}
-
-.center {
-  margin-top: 10px;
-  display: flex;
-  justify-content: center;
-}
 
 </style>

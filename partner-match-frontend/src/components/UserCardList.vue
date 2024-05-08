@@ -2,7 +2,7 @@
   <van-card v-for="user in userList"
             :desc="user.userProfile != null ? ('简介：' + user.userProfile) : '简介：这个人很懒，什么都没有留下~'"
             :title="user.username"
-            :thumb="user.avatarUrl != null ? user.avatarUrl : defaultAvatar"
+            :thumb="user.avatarUrl != null ? `http://localhost:8085/${user.avatarUrl}` : defaultUserAvatar"
             :tag="user.gender != null ? (user.gender === 0 ? '女' : '男') : '未知'">
     <template #tags>
       <div style="margin-bottom: 12px"></div>
@@ -15,13 +15,14 @@
     <template #footer>
       <van-button size="small">联系我</van-button>
     </template>
+
   </van-card>
 </template>
 
 <script setup lang="ts">
   //@ts-nocheck
   import {UserType} from "../models/user";
-  import defaultAvatar from "../assets/defaultAvatar.png"
+  import defaultUserAvatar from "../assets/defaultUserAvatar.jpg"
 
   interface  UserCardListProps {
     userList: UserType[]
@@ -33,5 +34,4 @@
 </script>
 
 <style scoped>
-
 </style>
