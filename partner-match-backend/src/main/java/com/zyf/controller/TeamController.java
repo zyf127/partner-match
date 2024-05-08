@@ -12,7 +12,9 @@ import com.zyf.model.vo.TeamUserVO;
 import com.zyf.service.TeamService;
 import com.zyf.service.UserService;
 import org.springframework.beans.BeanUtils;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -180,6 +182,30 @@ public class TeamController {
         boolean result = teamService.deleteTeam(teamDeleteRequest, loginUser);
         if (!result) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "删除队伍失败");
+        }
+        return ResultUtils.success(true);
+    }
+
+    /**
+     * 更换队伍头像接口
+     *
+     * @param avatarFile 头像文件
+     * @param teamId 队伍 id
+     * @param request
+     * @return 是否更换成功
+     */
+    @PostMapping("/avatar")
+    public BaseResponse<Boolean> updateUserAvatar(@RequestParam("avatarFile") MultipartFile avatarFile, @RequestParam("teamId") Long teamId, HttpServletRequest request) {
+        if (avatarFile == null || teamId == null || teamId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        Boolean result = teamService.updateTeamAvatar(avatarFile, loginUser, teamId);
+        if (!result) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "更换头像失败");
         }
         return ResultUtils.success(true);
     }

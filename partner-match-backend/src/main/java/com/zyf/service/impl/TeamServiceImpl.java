@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zyf.common.ErrorCode;
+import com.zyf.constant.AvatarConstant;
 import com.zyf.exception.BusinessException;
 import com.zyf.model.domain.Team;
 import com.zyf.model.domain.User;
@@ -24,17 +25,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
-import org.springframework.context.annotation.Bean;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -57,6 +56,12 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
      */
     @Resource
     private UserTeamService userTeamService;
+
+    /**
+     * 队伍 Mapper
+     */
+    @Resource
+    private TeamMapper teamMapper;
 
     /**
      * Redis 客户端
@@ -219,7 +224,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             throw new BusinessException((ErrorCode.NULL_ERROR), "队伍不存在");
         }
         // 只有队伍的创建者和管理员可以更新队伍
-        if (oldTeam.getUserId() != loginUser.getId() && userService.isAdmin(loginUser)) {
+        if (oldTeam.getUserId() != loginUser.getId() && !userService.isAdmin(loginUser)) {
             throw new BusinessException(ErrorCode.NO_AUTH);
         }
         Integer status = teamUpdateRequest.getTeamStatus();
@@ -447,6 +452,58 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         BeanUtils.copyProperties(team, teamUserVO);
         teamUserVO.setUserList(userList);
         return teamUserVO;
+    }
+
+    @Override
+    public Boolean updateTeamAvatar(MultipartFile avatarFile, User loginUser, Long teamId) {
+        // 1. 对头像进行校验
+        // 判断头像大小是否符合要求
+        if (avatarFile.getSize() > AvatarConstant.AVATAR_MAX_SIZE) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "头像大小超出限制");
+        }
+        // 判断头像类型是否为图片
+        String contentType = avatarFile.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "头像类型不符合要求");
+        }
+
+        // 2. 判断当前用户是否为队伍的队长
+        Team oldTeam = teamMapper.selectById(teamId);
+        if (oldTeam.getUserId() != loginUser.getId() && !userService.isAdmin(loginUser)) {
+            throw new BusinessException(ErrorCode.NO_AUTH);
+        }
+
+        // 3. 创建存放头像的目录
+        File path = new File("avatar/team");
+        if (!path.exists() || !path.isDirectory()) {
+            path.mkdirs();
+        }
+
+        // 4. 上传头像到目录中
+        String avatarName = UUID.randomUUID() + avatarFile.getOriginalFilename();
+        String avatarUrl = path.getPath() + File.separator + avatarName;
+        String avatarAbsolutePath = path.getAbsolutePath() + File.separator + avatarName;
+        try {
+            avatarFile.transferTo(new File(avatarAbsolutePath));
+        } catch (IOException e) {
+            log.error("update teamAvatar error", e);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+        }
+
+        // 5. 删除之前的头像
+        String oldAvatarUrl = oldTeam.getAvatarUrl();
+        if (StringUtils.isNotBlank(oldAvatarUrl)) {
+            File oldAvatar = new File(oldAvatarUrl);
+            if (oldAvatar.exists() && oldAvatar.isFile()) {
+                oldAvatar.delete();
+            }
+        }
+
+        // 6. 更新用户的 avatarUrl
+        UpdateWrapper<Team> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.set("avatar_url", avatarUrl);
+        updateWrapper.eq("id", teamId);
+        return this.update(updateWrapper);
     }
 }
 

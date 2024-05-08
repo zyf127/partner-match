@@ -1,11 +1,13 @@
 package com.zyf.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.zyf.common.ErrorCode;
+import com.zyf.constant.AvatarConstant;
 import com.zyf.constant.UserConstant;
 import com.zyf.model.domain.User;
 import com.zyf.exception.BusinessException;
@@ -20,10 +22,13 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -353,6 +358,53 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             log.error("redis set key error");
         }
         return finalUserList;
+    }
+
+    @Override
+    public Boolean updateUserAvatar(MultipartFile avatarFile, User loginUser) {
+        // 1. 对头像进行校验
+        // 判断头像大小是否符合要求
+        if (avatarFile.getSize() > AvatarConstant.AVATAR_MAX_SIZE) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "头像大小超出限制");
+        }
+        // 判断头像类型是否为图片
+        String contentType = avatarFile.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "头像类型不符合要求");
+        }
+
+        // 2. 创建存放头像的目录
+        File path = new File("avatar/user");
+        if (!path.exists() || !path.isDirectory()) {
+            path.mkdirs();
+        }
+
+        // 3. 上传头像到目录中
+        String avatarName =  UUID.randomUUID() + avatarFile.getOriginalFilename();
+        String avatarUrl = path.getPath() + File.separator + avatarName;
+        String avatarAbsolutePath = path.getAbsolutePath() + File.separator + avatarName;
+        try {
+            avatarFile.transferTo(new File(avatarAbsolutePath));
+        } catch (IOException e) {
+            log.error("update userAvatar error", e);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+        }
+
+        // 4. 删除之前的头像
+        User oldUser = userMapper.selectById(loginUser.getId());
+        String oldAvatarUrl = oldUser.getAvatarUrl();
+        if (StringUtils.isNotBlank(oldAvatarUrl)) {
+            File oldAvatar = new File(oldAvatarUrl);
+            if (oldAvatar.exists() && oldAvatar.isFile()) {
+                oldAvatar.delete();
+            }
+        }
+
+        // 5. 更新用户的 avatarUrl
+        UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.set("avatar_url", avatarUrl);
+        updateWrapper.eq("id", loginUser.getId());
+        return this.update(updateWrapper);
     }
 
     /**

@@ -9,6 +9,7 @@ import com.zyf.model.request.TeamJoinRequest;
 import com.zyf.model.request.TeamQuitRequest;
 import com.zyf.model.request.TeamUpdateRequest;
 import com.zyf.model.vo.TeamUserVO;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -74,4 +75,14 @@ public interface TeamService extends IService<Team> {
      * @return 队伍信息
      */
     TeamUserVO getTeamById(Long teamId);
+
+    /**
+     * 更换队伍头像
+     *
+     * @param avatarFile 头像文件
+     * @param loginUser 当前登录的用户
+     * @param teamId 队伍 id
+     * @return 是否更换成功
+     */
+    Boolean updateTeamAvatar(MultipartFile avatarFile, User loginUser, Long teamId);
 }

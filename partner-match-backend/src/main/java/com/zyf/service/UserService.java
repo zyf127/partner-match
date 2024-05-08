@@ -2,6 +2,7 @@ package com.zyf.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.zyf.model.domain.User;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -105,4 +106,13 @@ public interface UserService extends IService<User> {
      * @return 匹配到的用户
      */
     List<User> matchUsers(long num, User loginUser);
+
+    /**
+     * 更换用户头像
+     *
+     * @param avatarFile 头像文件
+     * @param loginUser 当前登录的用户
+     * @return 是否更换成功
+     */
+    Boolean updateUserAvatar(MultipartFile avatarFile, User loginUser);
 }

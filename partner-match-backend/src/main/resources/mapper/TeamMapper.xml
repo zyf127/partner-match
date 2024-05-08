@@ -8,6 +8,7 @@
             <id property="id" column="id" jdbcType="BIGINT"/>
             <result property="teamName" column="team_name" jdbcType="VARCHAR"/>
             <result property="teamDescription" column="team_description" jdbcType="VARCHAR"/>
+            <result property="avatarUrl" column="avatar_url" jdbcType="VARCHAR"/>
             <result property="maxNum" column="max_num" jdbcType="INTEGER"/>
             <result property="expireTime" column="expire_time" jdbcType="TIMESTAMP"/>
             <result property="userId" column="user_id" jdbcType="BIGINT"/>

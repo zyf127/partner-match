@@ -15,11 +15,15 @@ import com.zyf.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -256,5 +260,28 @@ public class UserController {
         }
         List<User> userList = userService.matchUsers(num, loginUser);
         return ResultUtils.success(userList);
+    }
+
+    /**
+     * 更换用户头像接口
+     *
+     * @param avatarFile 头像文件
+     * @param request
+     * @return 是否更换成功
+     */
+    @PostMapping("/avatar")
+    public BaseResponse<Boolean> updateUserAvatar(@RequestParam("avatarFile") MultipartFile avatarFile, HttpServletRequest request) {
+        if (avatarFile == null || avatarFile.isEmpty()) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        Boolean result = userService.updateUserAvatar(avatarFile, loginUser);
+        if (!result) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "更换头像失败");
+        }
+        return ResultUtils.success(true);
     }
 }

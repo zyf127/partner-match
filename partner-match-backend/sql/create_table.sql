@@ -50,6 +50,7 @@ create table team
         primary key,
     team_name        varchar(256)                       not null comment '队伍名称',
     team_description varchar(1024)                      null comment '队伍描述',
+    avatar_url       varchar(1024)                      null comment '队伍头像',
     max_num          int      default 1                 not null comment '最大人数',
     expire_time      datetime                           null comment '过期时间',
     user_id          bigint                             null comment '用户id（队长id）',
