@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zyf.common.ErrorCode;
+import com.zyf.config.MinioConfig;
 import com.zyf.constant.AvatarConstant;
 import com.zyf.exception.BusinessException;
 import com.zyf.model.domain.Team;
@@ -21,6 +22,9 @@ import com.zyf.service.TeamService;
 import com.zyf.mapper.TeamMapper;
 import com.zyf.service.UserService;
 import com.zyf.service.UserTeamService;
+import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
+import io.minio.RemoveObjectArgs;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -68,6 +72,18 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
      */
     @Resource
     private RedissonClient redissonClient;
+
+    /**
+     * Minio 配置项
+     */
+    @Resource
+    private MinioConfig minioConfig;
+
+    /**
+     * Minio 客户端
+     */
+    @Resource
+    private MinioClient minioClient;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -473,37 +489,40 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             throw new BusinessException(ErrorCode.NO_AUTH);
         }
 
-        // 3. 创建存放头像的目录
-        File path = new File("avatar/team");
-        if (!path.exists() || !path.isDirectory()) {
-            path.mkdirs();
-        }
-
-        // 4. 上传头像到目录中
-        String avatarName = UUID.randomUUID() + avatarFile.getOriginalFilename();
-        String avatarUrl = path.getPath() + File.separator + avatarName;
-        String avatarAbsolutePath = path.getAbsolutePath() + File.separator + avatarName;
+        // 3. 上传头像到对象存储服务器中
+        String avatarUrl =  "team/" + UUID.randomUUID() + avatarFile.getOriginalFilename();
         try {
-            avatarFile.transferTo(new File(avatarAbsolutePath));
-        } catch (IOException e) {
-            log.error("update teamAvatar error", e);
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+            minioClient.putObject(PutObjectArgs.builder()
+                    .bucket(minioConfig.getBucket()) // 存储桶
+                    .object(avatarUrl) // 文件名
+                    .stream(avatarFile.getInputStream(), avatarFile.getSize(), -1) // 文件内容
+                    .contentType(avatarFile.getContentType()) // 文件类型
+                    .build());
+        } catch (Exception e) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "头像上传失败");
         }
 
-        // 5. 删除之前的头像
         String oldAvatarUrl = oldTeam.getAvatarUrl();
-        if (StringUtils.isNotBlank(oldAvatarUrl)) {
-            File oldAvatar = new File(oldAvatarUrl);
-            if (oldAvatar.exists() && oldAvatar.isFile()) {
-                oldAvatar.delete();
-            }
-        }
 
-        // 6. 更新用户的 avatarUrl
+        // 4. 更新用户的 avatarUrl
         UpdateWrapper<Team> updateWrapper = new UpdateWrapper<>();
         updateWrapper.set("avatar_url", avatarUrl);
         updateWrapper.eq("id", teamId);
-        return this.update(updateWrapper);
+        boolean result = this.update(updateWrapper);
+        if (!result) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "更新队伍失败");
+        }
+
+        // 5. 删除之前的头像
+        if (StringUtils.isNotBlank(oldAvatarUrl)) {
+            try {
+                minioClient.removeObject(RemoveObjectArgs.builder().bucket(minioConfig.getBucket()).object(oldAvatarUrl).build());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return true;
     }
 }
 

@@ -392,8 +392,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "头像类型不符合要求");
         }
 
-        String avatarUrl =  "user/" + UUID.randomUUID() + avatarFile.getOriginalFilename();
         // 2. 上传头像到对象存储服务器中
+        String avatarUrl =  "user/" + UUID.randomUUID() + avatarFile.getOriginalFilename();
         try {
             minioClient.putObject(PutObjectArgs.builder()
                     .bucket(minioConfig.getBucket()) // 存储桶

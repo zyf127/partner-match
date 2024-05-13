@@ -8,7 +8,7 @@
             style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);"
             width="125px"
             height="125px"
-            src="http://106.54.17.50:9000/avatar/树.jpg"
+            :src="user.avatarUrl != null ? `http://${avatarBaseURL}${user.avatarUrl}` : defaultUserAvatar"
             radius="20%"
             fit="cover"
         />
@@ -36,6 +36,7 @@
   import myAxios from "../plugins/myAxios";
   import {showFailToast, showSuccessToast} from "vant";
   import defaultUserAvatar from "../assets/defaultUserAvatar.jpg"
+  import {avatarBaseURL} from "../constants/avatar.ts";
 
   const router = useRouter();
   const user = ref();

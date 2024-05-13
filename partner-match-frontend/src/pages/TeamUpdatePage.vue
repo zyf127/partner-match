@@ -8,9 +8,9 @@
             style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);"
             width="125px"
             height="125px"
-
             radius="20%"
             fit="cover"
+            :src="teamData.avatarUrl != null ? `http://${avatarBaseURL}${teamData.avatarUrl}` : defaultTeamAvatar"
         />
       </van-uploader>
     </div>
@@ -91,6 +91,8 @@ import myAxios from "../plugins/myAxios";
 import {showFailToast, showSuccessToast} from "vant";
 import {formatDateTime} from "../services/team.ts";
 import defaultTeamUrl from "../assets/defaultTeamAvatar.png";
+import {avatarBaseURL} from "../constants/avatar.ts";
+import defaultTeamAvatar from "../assets/defaultTeamAvatar.png";
 
 
 const router = useRouter();

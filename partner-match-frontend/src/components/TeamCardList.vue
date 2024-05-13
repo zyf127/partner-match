@@ -34,7 +34,7 @@
     <van-card v-for="team in filteredTeamList"
               :title="team.teamName"
               :desc="team.teamDescription"
-              :thumb="team.avatarUrl != null ? `http://localhost:8085/${team.avatarUrl}` : defaultTeamAvatar">
+              :thumb="team.avatarUrl != null ? `http://${avatarBaseURL}${team.avatarUrl}` : defaultTeamAvatar">
       <template #tags>
         <van-tag plain type="primary" style="margin-right: 12px; margin-top: 5px">{{ teamStatusEnum[team.teamStatus] }}</van-tag>
         <van-tag plain type="warning" style="margin-right: 12px; margin-top: 5px">队长：{{team.userList[0].username}}</van-tag>
@@ -83,6 +83,7 @@ import {getCurrentUser} from "../services/user.ts";
 import {UserType} from "../models/user";
 import {TeamType} from "../models/team";
 import {useRouter} from "vue-router";
+import {avatarBaseURL} from "../constants/avatar.ts";
 
 const router = useRouter();
 
@@ -234,7 +235,6 @@ const toUpdateTeamPage = (teamId) => {
 
 <style scoped>
 #teamCardList :deep(.van-image__img) {
-  object-fit: unset;
-  height: 110px;
+ margin-top: 12px;
 }
 </style>

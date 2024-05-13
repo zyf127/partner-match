@@ -1,10 +1,10 @@
 // 创建实例时配置默认值
 import axios from "axios";
 
-const isDev = process.env.NODE_ENV === 'development';
+const baseURL = import.meta.env.VITE_APP_API_BASEURL;
 
 const myAxios = axios.create({
-    baseURL: isDev ? 'http://localhost:8080/api' : 'https://zhiyouge.top'
+    baseURL: baseURL
 });
 
 // 进行跨域请求时能够携带跨域请求中的凭据信息
