@@ -4,6 +4,17 @@
       <van-switch v-model="isMatchMode" @change="loadData" />
     </template>
   </van-cell>
+  <van-search
+      v-model="searchText"
+      show-action
+      placeholder="请输入用户关键词"
+      @search="onSearch"
+      @clear="onCancel"
+  >
+    <template #action>
+      <div @click="onSearch">搜索</div>
+    </template>
+  </van-search>
   <UserCardList :user-list="userList" v-if="!isLoadData"/>
   <van-skeleton v-else v-for="i in [1, 2, 3, 4]" style="margin-top: 5px; height: 120px;">
     <template #template>
@@ -23,8 +34,8 @@
 
 <script setup>
 import myAxios from "../plugins/myAxios.js"
-import {ref, onMounted} from "vue";
-import {showFailToast} from "vant";
+import {ref, onMounted, watch } from "vue";
+import {showFailToast } from "vant";
 import UserCardList from "../components/UserCardList.vue";
 
 let userList = ref([]);
@@ -33,9 +44,38 @@ const isMatchMode = ref(false);
 
 const isLoadData = ref(false);
 
+const searchText = ref('');
+
 onMounted(async () => {
   await loadData();
 });
+
+const onSearch = async () => {
+  searchText.value = searchText.value.trim();
+  if (searchText.value === '') {
+    await loadData();
+  } else {
+    const res = await myAxios.get('/user/search', {
+      params: {
+        searchText: searchText.value
+      }
+    });
+    if (res['code'] === 0) {
+      userList.value = res.data;
+      userList.value.forEach(user => {
+        if (user.tagNames) {
+          user.tagNames = JSON.parse(user.tagNames);
+        }
+      });
+    } else {
+      showFailToast('搜索用户失败');
+    }
+  }
+};
+const onCancel = () => {
+  searchText.value = ''
+  loadData();
+};
 
 const loadData = async () => {
   isLoadData.value = true;
@@ -76,6 +116,12 @@ const loadData = async () => {
   }
   isLoadData.value = false;
 }
+
+watch(searchText,  () => {
+  if (searchText.value === '') {
+    loadData();
+  }
+})
 
 </script>
 

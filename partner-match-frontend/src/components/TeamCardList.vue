@@ -177,7 +177,6 @@ const onSearch = async () => {
   if (res['code'] === 0) {
     teamList = res.data;
     doTabChange();
-    showSuccessToast('搜索队伍成功');
   } else {
     showFailToast('搜索队伍失败');
   }

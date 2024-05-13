@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.zyf.common.ErrorCode;
+import com.zyf.config.MinioConfig;
 import com.zyf.constant.AvatarConstant;
 import com.zyf.constant.UserConstant;
 import com.zyf.model.domain.User;
@@ -14,6 +15,10 @@ import com.zyf.exception.BusinessException;
 import com.zyf.mapper.UserMapper;
 import com.zyf.service.UserService;
 import com.zyf.utils.AlgorithmUtils;
+import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
+import io.minio.RemoveObjectArgs;
+import io.minio.errors.*;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -29,6 +34,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -67,6 +74,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      */
     @Resource
     private RedisTemplate redisTemplate;
+
+    /**
+     * Minio 配置项
+     */
+    @Resource
+    private MinioConfig minioConfig;
+
+    /**
+     * Minio 客户端
+     */
+    @Resource
+    private MinioClient minioClient;
 
     @Override
     public long userRegister(String username, String userAccount, String userPassword, String checkPassword) {
@@ -373,38 +392,41 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "头像类型不符合要求");
         }
 
-        // 2. 创建存放头像的目录
-        File path = new File("avatar/user");
-        if (!path.exists() || !path.isDirectory()) {
-            path.mkdirs();
-        }
-
-        // 3. 上传头像到目录中
-        String avatarName =  UUID.randomUUID() + avatarFile.getOriginalFilename();
-        String avatarUrl = path.getPath() + File.separator + avatarName;
-        String avatarAbsolutePath = path.getAbsolutePath() + File.separator + avatarName;
+        String avatarUrl =  "user/" + UUID.randomUUID() + avatarFile.getOriginalFilename();
+        // 2. 上传头像到对象存储服务器中
         try {
-            avatarFile.transferTo(new File(avatarAbsolutePath));
-        } catch (IOException e) {
-            log.error("update userAvatar error", e);
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+            minioClient.putObject(PutObjectArgs.builder()
+                    .bucket(minioConfig.getBucket()) // 存储桶
+                    .object(avatarUrl) // 文件名
+                    .stream(avatarFile.getInputStream(), avatarFile.getSize(), -1) // 文件内容
+                    .contentType(avatarFile.getContentType()) // 文件类型
+                    .build());
+        } catch (Exception e) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "头像上传失败");
         }
 
-        // 4. 删除之前的头像
         User oldUser = userMapper.selectById(loginUser.getId());
         String oldAvatarUrl = oldUser.getAvatarUrl();
-        if (StringUtils.isNotBlank(oldAvatarUrl)) {
-            File oldAvatar = new File(oldAvatarUrl);
-            if (oldAvatar.exists() && oldAvatar.isFile()) {
-                oldAvatar.delete();
-            }
-        }
 
-        // 5. 更新用户的 avatarUrl
+        // 3. 更新用户的 avatarUrl
         UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
         updateWrapper.set("avatar_url", avatarUrl);
         updateWrapper.eq("id", loginUser.getId());
-        return this.update(updateWrapper);
+        boolean result = this.update(updateWrapper);
+        if (!result) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "更新用户失败");
+        }
+
+        // 4. 删除之前的头像
+        if (StringUtils.isNotBlank(oldAvatarUrl)) {
+            try {
+                minioClient.removeObject(RemoveObjectArgs.builder().bucket(minioConfig.getBucket()).object(oldAvatarUrl).build());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return true;
     }
 
     /**

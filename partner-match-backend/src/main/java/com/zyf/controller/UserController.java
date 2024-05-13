@@ -6,12 +6,14 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.zyf.common.BaseResponse;
 import com.zyf.common.ErrorCode;
 import com.zyf.common.ResultUtils;
+import com.zyf.config.MinioConfig;
 import com.zyf.model.domain.User;
 import com.zyf.model.request.UserLoginRequest;
 import com.zyf.model.request.UserRegisterRequest;
 import com.zyf.exception.BusinessException;
 import com.zyf.model.request.UserTagNameUpdateRequest;
 import com.zyf.service.UserService;
+import io.minio.MinioClient;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +37,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/user")
 @CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"}, allowCredentials = "true")
 public class UserController {
+
     /**
      * 用户服务
      */
@@ -114,18 +117,22 @@ public class UserController {
     /**
      * 查询用户接口
      *
-     * @param username 用户名
+     * @param searchText 关键词
      * @return 用户集合
      */
     @GetMapping("/search")
-    public BaseResponse<List<User>> searchUsers(String username, HttpServletRequest request) {
-        // 仅限管理员查询
-        if (!isAdmin(request)) {
-            throw new BusinessException(ErrorCode.NO_AUTH);
+    public BaseResponse<List<User>> searchUsers(@RequestParam("searchText") String searchText, HttpServletRequest request) {
+        if (StringUtils.isAnyBlank(searchText)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "关键词不能为空");
         }
+        User loginUser = userService.getLoginUser(request);
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        if (StringUtils.isNotBlank(username)) {
-            queryWrapper.like("username", username);
+        if (loginUser != null) {
+            queryWrapper.ne("id", loginUser.getId());
+        }
+        if (StringUtils.isNotBlank(searchText)) {
+            queryWrapper.and(qw -> qw.like("username", searchText)
+                    .or().like("user_profile", searchText).or().like("tag_names", searchText));
         }
         List<User> userList = userService.list(queryWrapper);
         List<User> safetyUserList = userList.stream().map((user) -> userService.getSafetyUser(user)).collect(Collectors.toList());

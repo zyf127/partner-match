@@ -8,8 +8,9 @@
             style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);"
             width="125px"
             height="125px"
-            :src="user.avatarUrl != null ? `http://localhost:8085/${user.avatarUrl}` : defaultUserAvatar"
+            src="http://106.54.17.50:9000/avatar/树.jpg"
             radius="20%"
+            fit="cover"
         />
       </van-uploader>
     </div>
