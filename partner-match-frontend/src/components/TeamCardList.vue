@@ -34,7 +34,7 @@
     <van-card v-for="team in filteredTeamList"
               :title="team.teamName"
               :desc="team.teamDescription"
-              :thumb="team.avatarUrl != null ? `http://${avatarBaseURL}${team.avatarUrl}` : defaultTeamAvatar">
+              :thumb="team.avatarUrl != null ? `${avatarBaseURL}${team.avatarUrl}` : defaultTeamAvatar">
       <template #tags>
         <van-tag plain type="primary" style="margin-right: 12px; margin-top: 5px">{{ teamStatusEnum[team.teamStatus] }}</van-tag>
         <van-tag plain type="warning" style="margin-right: 12px; margin-top: 5px">队长：{{team.userList[0].username}}</van-tag>
@@ -74,11 +74,11 @@
 <script setup lang="ts">
 //@ts-nocheck
 import {ref} from "vue";
-import defaultTeamAvatar from "../assets/defaultTeamAvatar.png"
+import defaultTeamAvatar from "../assets/avatar/defaultTeamAvatar.png"
 import {teamStatusEnum} from "../constants/team.ts";
 import myAxios from "../plugins/myAxios";
 import {showConfirmDialog, showFailToast, showSuccessToast} from "vant";
-import {formatDateTime} from "../services/team.ts";
+import {formatDateTime} from "../services/datetime.ts";
 import {getCurrentUser} from "../services/user.ts";
 import {UserType} from "../models/user";
 import {TeamType} from "../models/team";

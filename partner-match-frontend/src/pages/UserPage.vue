@@ -8,7 +8,7 @@
             style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);"
             width="125px"
             height="125px"
-            :src="user.avatarUrl != null ? `http://${avatarBaseURL}${user.avatarUrl}` : defaultUserAvatar"
+            :src="user.avatarUrl != null ? `${avatarBaseURL}${user.avatarUrl}` : defaultUserAvatar"
             radius="20%"
             fit="cover"
         />
@@ -31,11 +31,11 @@
   import {onMounted, ref} from "vue";
   import {useRouter} from "vue-router";
   import {getCurrentUser} from "../services/user.ts";
-  import {formatDateTime} from "../services/team.ts";
+  import {formatDateTime} from "../services/datetime.ts";
   // @ts-ignore
   import myAxios from "../plugins/myAxios";
   import {showFailToast, showSuccessToast} from "vant";
-  import defaultUserAvatar from "../assets/defaultUserAvatar.jpg"
+  import defaultUserAvatar from "../assets/avatar/defaultUserAvatar.jpg"
   import {avatarBaseURL} from "../constants/avatar.ts";
 
   const router = useRouter();
@@ -68,27 +68,31 @@
   }
 
   const getSafetyPhone = (s: string) => {
-    let charArray = s.split('');
-    for (let i = 0; i < s.length; i++) {
-      if (i >= 3 && i <= 6) {
-        charArray[i] = '*';
+    if (s) {
+      let charArray = s.split('');
+      for (let i = 0; i < s.length; i++) {
+        if (i >= 3 && i <= 6) {
+          charArray[i] = '*';
+        }
       }
+      return charArray.join('');
     }
-    return charArray.join('');
   }
 
   const getSafeEmail = (s: string) => {
-    let charArray = s.split('');
-    let i;
-    for (i = 0; i < s.length; i++) {
-      if (charArray[i] === '@') {
-        break;
+    if (s) {
+      let charArray = s.split('');
+      let i;
+      for (i = 0; i < s.length; i++) {
+        if (charArray[i] === '@') {
+          break;
+        }
       }
+      for (let j =  Math.floor(i / 2); j < i; j++) {
+        charArray[j] = '*';
+      }
+      return charArray.join('');
     }
-    for (let j =  Math.floor(i / 2); j < i; j++) {
-      charArray[j] = '*';
-    }
-    return charArray.join('');
   }
 
   const showMyTags = () => {

@@ -80,7 +80,7 @@
   import {useRouter} from "vue-router";
   import myAxios from "../plugins/myAxios";
   import {showFailToast, showSuccessToast} from "vant";
-  import {formatDateTime} from "../services/team.ts";
+  import {formatDateTime} from "../services/datetime.ts";
 
 
   const router = useRouter();

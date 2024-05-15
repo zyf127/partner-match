@@ -4,7 +4,8 @@
       left-arrow
       left-text="返回"
       @click-left="onClickLeft"
-      @click-right="onClickRight">
+      @click-right="onClickRight"
+      :fixed="true">
     <template #right>
       <van-icon name="search" size="18" /><span style="color: #2f9dfb">标签</span>
     </template>
@@ -12,22 +13,60 @@
   <div id="content">
     <router-view />
   </div>
-  <van-tabbar>
-    <van-tabbar-item replace to="/" icon="home-o" name="index">首页</van-tabbar-item>
-    <van-tabbar-item replace to="/team" icon="search" name="team">组队</van-tabbar-item>
-    <van-tabbar-item replace to="/user" icon="friends-o" name="user">个人</van-tabbar-item>
+  <van-tabbar v-model="active" @change="change">
+    <van-tabbar-item replace to="/" name="index">
+      <span>首页</span>
+      <template #icon="props">
+        <img :src="props.active ? activeIndex : inactiveIndex"/>
+      </template>
+    </van-tabbar-item>
+    <van-tabbar-item replace to="/team" name="team">
+      <span>组队</span>
+      <template #icon="props">
+        <img :src="props.active ? activeTeam : inactiveTeam"/>
+      </template>
+    </van-tabbar-item>
+    <van-tabbar-item replace to="/chat" name="chat">
+      <span>聊天室</span>
+      <template #icon="props">
+        <img :src="props.active ? activeChat : inactiveChat"/>
+      </template>
+    </van-tabbar-item>
+    <van-tabbar-item replace to="/user" name="user">
+      <span>个人</span>
+      <template #icon="props">
+        <img :src="props.active ? activeUser : inactiveUser"/>
+      </template>
+    </van-tabbar-item>
   </van-tabbar>
 </template>
 
 <script setup>
-  import {ref} from "vue";
+  import {ref, onMounted} from "vue";
   import {useRouter} from "vue-router";
   import {routes} from "../router/index.ts";
+  import activeIndex from "../assets/icon/activeIndex.png"
+  import inactiveIndex from "../assets/icon/inactiveIndex.png"
+  import activeTeam from "../assets/icon/activeTeam.png"
+  import inactiveTeam from "../assets/icon/inactiveTeam.png"
+  import activeChat from "../assets/icon/activeChat.png"
+  import inactiveChat from "../assets/icon/inactiveChat.png"
+  import activeUser from "../assets/icon/activeUser.png"
+  import inactiveUser from "../assets/icon/inactiveUser.png"
 
   const router = useRouter()
 
   const DEFAULT_TITLE = '伙伴匹配';
-  const title = ref(DEFAULT_TITLE)
+  const title = ref(DEFAULT_TITLE);
+
+  const active = ref('index');
+
+  onMounted(() => {
+    const newActive = localStorage.getItem("active");
+    if (newActive) {
+      active.value = newActive;
+    }
+  });
 
   router.beforeEach((to) => {
     let toRoute = {};
@@ -45,10 +84,15 @@
 
   const onClickLeft = () => router.back();
   const onClickRight = () => router.push('/search');
+
+  const change = () => {
+    localStorage.setItem('active', active.value);
+  }
 </script>
 
 <style scoped>
   #content {
+    padding-top: 45px;
     padding-bottom: 55px;
   }
 </style>

@@ -10,11 +10,12 @@ import TeamAddPage from "../pages/TeamAddPage.vue";
 import TeamDetailPage from "../pages/TeamDetailPage.vue";
 import TeamUpdatePage from "../pages/TeamUpdatePage.vue";
 import UserRegisterPage from "../pages/UserRegisterPage.vue";
+import ChatPage from "../pages/ChatPage.vue";
 
 export const routes = [
     {path: '/', title:'伙伴匹配', component: Index},
     {path: '/team', title:'找队伍', component: TeamPage},
-    {path: '/user', title:'用户信息', component: UserPage},
+    {path: '/user', title:'个人信息', component: UserPage},
     {path: '/search', title:'搜索', component: SearchPage},
     {path: '/user/register', title: '注册', component: UserRegisterPage},
     {path: '/user/login', title:'登录', component: UserLoginPage},
@@ -22,7 +23,8 @@ export const routes = [
     {path: '/user/edit', title:'编辑信息', component: UserEditPage},
     {path: '/team/add', title:'创建队伍', component: TeamAddPage},
     {path: '/team/detail', title:'队伍详情', component: TeamDetailPage},
-    {path: '/team/update', title:'更新队伍', component: TeamUpdatePage}
+    {path: '/team/update', title:'更新队伍', component: TeamUpdatePage},
+    {path: '/chat', title: '聊天', component: ChatPage}
 ]
 
 const router = VueRouter.createRouter({

@@ -2,7 +2,7 @@
   <van-card v-for="user in userList"
             :desc="user.userProfile != null ? ('简介：' + user.userProfile) : '简介：这个人很懒，什么都没有留下~'"
             :title="user.username"
-            :thumb="user.avatarUrl != null ? `http://${avatarBaseURL}${user.avatarUrl}` : defaultUserAvatar"
+            :thumb="user.avatarUrl != null ? `${avatarBaseURL}${user.avatarUrl}` : defaultUserAvatar"
             :tag="user.gender != null ? (user.gender === 0 ? '女' : '男') : '未知'">
     <template #tags>
       <div style="margin-bottom: 12px"></div>
@@ -22,7 +22,7 @@
 <script setup lang="ts">
   //@ts-nocheck
   import {UserType} from "../models/user";
-  import defaultUserAvatar from "../assets/defaultUserAvatar.jpg"
+  import defaultUserAvatar from "../assets/avatar/defaultUserAvatar.jpg"
   import {avatarBaseURL} from "../constants/avatar.ts";
 
   interface  UserCardListProps {

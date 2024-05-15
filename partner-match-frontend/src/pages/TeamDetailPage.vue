@@ -5,7 +5,7 @@
           style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);"
           width="125px"
           height="125px"
-          :src="team.avatarUrl != null ? `http://${avatarBaseURL}${team.avatarUrl}` : defaultTeamAvatar"
+          :src="team.avatarUrl != null ? `${avatarBaseURL}${team.avatarUrl}` : defaultTeamAvatar"
           radius="20%"
           fit="cover"
       />
@@ -27,7 +27,7 @@ import {TeamType} from "../models/team";
 import {onMounted, ref} from "vue";
 import myAxios from "../plugins/myAxios";
 import {showFailToast} from "vant";
-import defaultTeamAvatar from "../assets/defaultTeamAvatar.png"
+import defaultTeamAvatar from "../assets/avatar/defaultTeamAvatar.png"
 import {avatarBaseURL} from "../constants/avatar.ts";
 
 const route = useRoute();
