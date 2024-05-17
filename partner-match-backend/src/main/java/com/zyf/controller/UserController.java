@@ -3,18 +3,21 @@ package com.zyf.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.zyf.common.BaseResponse;
 import com.zyf.common.ErrorCode;
 import com.zyf.common.ResultUtils;
-import com.zyf.config.MinioConfig;
 import com.zyf.model.domain.User;
+import com.zyf.model.request.UserFriendRemoveRequest;
 import com.zyf.model.request.UserLoginRequest;
 import com.zyf.model.request.UserRegisterRequest;
 import com.zyf.exception.BusinessException;
 import com.zyf.model.request.UserTagNameUpdateRequest;
+import com.zyf.model.vo.UserFriendshipVO;
 import com.zyf.service.UserService;
-import io.minio.MinioClient;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,10 +25,10 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
-import java.io.File;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -288,6 +291,103 @@ public class UserController {
         Boolean result = userService.updateUserAvatar(avatarFile, loginUser);
         if (!result) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "更换头像失败");
+        }
+        return ResultUtils.success(true);
+    }
+
+    /**
+     * 根据 id 获取用户接口
+     *
+     * @param userId 用户 id
+     * @return 脱敏后的用户信息
+     */
+    @GetMapping("/get/id")
+    public BaseResponse<User> getUserById(@RequestParam Long userId) {
+        if (userId == null || userId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在");
+        }
+        User user = userService.getById(userId);
+        User safetyUser = userService.getSafetyUser(user);
+        return ResultUtils.success(safetyUser);
+    }
+
+    /**
+     * 根据用户 id 获取用户集合
+     *
+     * @param userIdList 用户 id 集合
+     * @param friendshipIdList 好友申请 id 集合
+     * @return 用户 + 好友申请 id 的集合
+     */
+    @GetMapping("/get/ids")
+    public BaseResponse<List<UserFriendshipVO>> getUsersByIds(@RequestParam List<Long> userIdList, @RequestParam List<Long> friendshipIdList) {
+        List<UserFriendshipVO> userFriendshipVOList = new ArrayList<>();
+        if (CollectionUtils.isEmpty(userIdList)) {
+            return ResultUtils.success(userFriendshipVOList);
+        }
+        Map<Long, Long> userIdFriendshipIdMap = new HashMap<>();
+        for (int i = 0; i < userIdList.size(); i++) {
+            userIdFriendshipIdMap.put(userIdList.get(i), friendshipIdList.get(i));
+        }
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.in("id", userIdList);
+        List<User> userList = userService.list(queryWrapper);
+        userFriendshipVOList = userList.stream().map(userService::getSafetyUser).map(user -> {
+            UserFriendshipVO userFriendshipVO = new UserFriendshipVO();
+            BeanUtils.copyProperties(user, userFriendshipVO);
+            userFriendshipVO.setFriendshipId(userIdFriendshipIdMap.get(user.getId()));
+            return userFriendshipVO;
+        }).collect(Collectors.toList());
+        return ResultUtils.success(userFriendshipVOList);
+    }
+
+    /**
+     * 获取当前用户的好友
+     *
+     * @param request
+     * @return 好友集合
+     */
+    @GetMapping("/get/friends")
+    public BaseResponse<List<User>> getUserFriends(HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        String friendIds = loginUser.getFriendIds();
+        List<Long> friendIdList = new Gson().fromJson(friendIds, new TypeToken<List<Long>>() {
+        }.getType());
+        List<User> safetyList = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(friendIdList)) {
+            QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+            queryWrapper.in("id", friendIdList);
+            List<User> friendList = userService.list(queryWrapper);
+            safetyList = friendList.stream().map(userService::getSafetyUser).collect(Collectors.toList());
+        }
+        return ResultUtils.success(safetyList);
+    }
+
+    /**
+     * 删除用户的好友
+     *
+     * @param userFriendRemoveRequest 用户好友删除请求体
+     * @param request
+     * @return 是否删除成功
+     */
+    @PostMapping("/remove/friend")
+    public BaseResponse<Boolean> removeUserFriend(@RequestBody UserFriendRemoveRequest userFriendRemoveRequest, HttpServletRequest request) {
+        if (userFriendRemoveRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Long friendId = userFriendRemoveRequest.getFriendId();
+        if (friendId == null || friendId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        Boolean result = userService.removeUserFriend(loginUser, friendId);
+        if (!result) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
         }
         return ResultUtils.success(true);
     }

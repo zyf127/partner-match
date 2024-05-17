@@ -8,10 +8,11 @@ create table user
     avatar_url    varchar(1024)                      null comment '用户头像',
     gender        tinyint                            null comment '性别',
     user_password varchar(512)                       not null comment '密码',
-    phone         varchar(128)                       null comment '电话',
+    contact_info  varchar(512)                       null comment '联系方式',
     email         varchar(512)                       null comment '邮箱',
     user_profile  varchar(512)                       null comment '个人简介',
     tag_names     varchar(1024)                      null comment '标签名称 json 列表',
+    friend_ids    varchar(1024)                      null comment '好友 id 列表',
     user_status   int      default 0                 not null comment '状态 0 - 正常',
     user_role     tinyint  default 0                 not null comment '角色 0 - 普通用户 1 - 管理员',
     create_time   datetime default CURRENT_TIMESTAMP null comment '创建时间',
@@ -19,6 +20,7 @@ create table user
     is_delete     tinyint  default 0                 not null comment '是否删除'
 )
     comment '用户';
+
 
 
 -- 标签表
@@ -78,4 +80,34 @@ create table user_team
 
     comment '用户队伍关系';
 
+-- 聊天消息表
+create table chat_message
+(
+    id              bigint auto_increment comment 'id'
+        primary key,
+    from_id         bigint                             not null comment '发送消息 id',
+    to_id           bigint                             null comment '接收消息 id',
+    message_content varchar(1024)                      not null comment '消息内容',
+    message_type    tinyint                            not null comment '消息类型 0 - 世界聊天 1 - 队伍聊天 2 - 私聊',
+    team_id         bigint                             null comment '队伍 id',
+    create_time     datetime default CURRENT_TIMESTAMP null comment '创建时间',
+    update_time     datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment '更新时间',
+    is_delete       tinyint  default 0                 not null comment '是否删除'
+)
+    comment '聊天消息';
+
+-- 好友申请表
+create table friendship
+(
+    id              bigint auto_increment comment '好友申请 id'
+        primary key,
+    from_id         bigint                             not null comment '发送申请的用户 id',
+    to_id           bigint                             not null comment '接收申请的用户 id ',
+    request_status  tinyint  default 0                 not null comment '申请状态 默认 0 （0-待处理 1-已同意 2-已拒绝）',
+    request_message varchar(256)                       null comment '好友申请验证信息',
+    create_time     datetime default CURRENT_TIMESTAMP null comment '创建时间',
+    update_time     datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment '更新时间',
+    is_delete       tinyint  default 0                 not null comment '是否删除'
+)
+    comment '好友申请表';
 

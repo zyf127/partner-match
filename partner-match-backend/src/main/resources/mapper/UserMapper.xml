@@ -11,10 +11,11 @@
             <result property="avatarUrl" column="avatar_url" jdbcType="VARCHAR"/>
             <result property="gender" column="gender" jdbcType="TINYINT"/>
             <result property="userPassword" column="user_password" jdbcType="VARCHAR"/>
-            <result property="phone" column="phone" jdbcType="VARCHAR"/>
+            <result property="contactInfo" column="contact_info" jdbcType="VARCHAR"/>
             <result property="email" column="email" jdbcType="VARCHAR"/>
             <result property="userProfile" column="user_profile" jdbcType="VARCHAR"/>
             <result property="tagNames" column="tag_names" jdbcType="VARCHAR"/>
+            <result property="friendIds" column="friends_ids" jdbcType="VARCHAR"/>
             <result property="userStatus" column="user_status" jdbcType="INTEGER"/>
             <result property="userRole" column="user_role" jdbcType="TINYINT"/>
             <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
@@ -25,14 +26,14 @@
     <sql id="Base_Column_List">
         id,username,user_account,
         avatar_url,gender,user_password,
-        phone,email,user_profile,
-        tag_names,user_status,user_role,
+        contact_info,email,user_profile,
+        tag_names,friend_ids,user_status,user_role,
         create_time,update_time,is_delete
     </sql>
 
     <select id="selectUsersByTeamId" resultMap="BaseResultMap">
         SELECT
-            u.id, u.username, u.user_account, u.avatar_url, u.gender, u.phone, u.email,
+            u.id, u.username, u.user_account, u.avatar_url, u.gender, u.contact_info, u.email,
             u.user_profile, u.tag_names, u.user_status, u.user_role, u.create_time, u.update_time
         FROM
             team t

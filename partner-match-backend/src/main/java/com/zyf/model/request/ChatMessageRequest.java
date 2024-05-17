@@ -24,7 +24,7 @@ public class ChatMessageRequest implements Serializable {
     private String messageContent;
 
     /**
-     * 消息类型 1 - 私聊 2 - 群聊
+     * 消息类型 0 - 世界聊天 1 - 队伍聊天 2 - 私聊
      */
     private Integer messageType;
 

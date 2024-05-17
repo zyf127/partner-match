@@ -115,4 +115,22 @@ public interface UserService extends IService<User> {
      * @return 是否更换成功
      */
     Boolean updateUserAvatar(MultipartFile avatarFile, User loginUser);
+
+    /**
+     * 添加好友
+     *
+     * @param loginUser 当前登录的用户
+     * @param friendId 好友 id
+     * @return 是否添加成功
+     */
+    Boolean makeFriends(User loginUser, Long friendId);
+
+    /**
+     * 删除用户的好友
+     *
+     * @param loginUser 当前登录的用户
+     * @param friendId 好友 id
+     * @return 是否删除成功
+     */
+    Boolean removeUserFriend(User loginUser, Long friendId);
 }

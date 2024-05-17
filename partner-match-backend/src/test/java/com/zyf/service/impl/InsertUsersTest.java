@@ -33,7 +33,7 @@ public class InsertUsersTest {
             user.setAvatarUrl("https://images.zsxq.com/Fr5fi8-x1V7G7cXCQO3-eMonxIsf?e=1714492799&token=kIxbL07-8jAj8w1n4s9zv64FuZZNEATmlU_Vm6zD:rNB-iPf8HwoEX6txskdKq8IEwIM=");
             user.setGender(0);
             user.setUserPassword("12345678");
-            user.setPhone("123");
+            user.setContactInfo("123");
             user.setEmail("123@qq.com");
             user.setTagNames("[\"Java\"]");
             user.setUserStatus(0);
@@ -66,7 +66,7 @@ public class InsertUsersTest {
             user.setAvatarUrl("https://images.zsxq.com/Fr5fi8-x1V7G7cXCQO3-eMonxIsf?e=1714492799&token=kIxbL07-8jAj8w1n4s9zv64FuZZNEATmlU_Vm6zD:rNB-iPf8HwoEX6txskdKq8IEwIM=");
             user.setGender(0);
             user.setUserPassword("12345678");
-            user.setPhone("123");
+            user.setContactInfo("123");
             user.setEmail("123@qq.com");
             user.setTagNames("[\"Java\"]");
             user.setUserStatus(0);
@@ -102,7 +102,7 @@ public class InsertUsersTest {
                 user.setAvatarUrl("https://images.zsxq.com/Fr5fi8-x1V7G7cXCQO3-eMonxIsf?e=1714492799&token=kIxbL07-8jAj8w1n4s9zv64FuZZNEATmlU_Vm6zD:rNB-iPf8HwoEX6txskdKq8IEwIM=");
                 user.setGender(0);
                 user.setUserPassword("12345678");
-                user.setPhone("123");
+                user.setContactInfo("123");
                 user.setEmail("123@qq.com");
                 user.setTagNames("[\"Java\"]");
                 user.setUserStatus(0);

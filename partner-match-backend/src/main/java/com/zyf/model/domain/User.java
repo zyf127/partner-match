@@ -1,10 +1,10 @@
 package com.zyf.model.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
-import lombok.Data;
 
 /**
  * 用户
@@ -13,6 +13,7 @@ import lombok.Data;
 @TableName(value ="user")
 @Data
 public class User implements Serializable {
+
     /**
      * id
      */
@@ -45,9 +46,9 @@ public class User implements Serializable {
     private String userPassword;
 
     /**
-     * 电话
+     * 联系方式
      */
-    private String phone;
+    private String contactInfo;
 
     /**
      * 邮箱
@@ -63,6 +64,11 @@ public class User implements Serializable {
      * 标签名称 json 列表
      */
     private String tagNames;
+
+    /**
+     * 好友 id 列表
+     */
+    private String friendIds;
 
     /**
      * 状态 0 - 正常
@@ -91,7 +97,7 @@ public class User implements Serializable {
     private Integer isDelete;
 
     @TableField(exist = false)
-    private static final long serialVersionUID = -288535867021252852L;
+    private static final long serialVersionUID = -7077912140280404951L;
 
     @Override
     public boolean equals(Object that) {
@@ -111,10 +117,11 @@ public class User implements Serializable {
             && (this.getAvatarUrl() == null ? other.getAvatarUrl() == null : this.getAvatarUrl().equals(other.getAvatarUrl()))
             && (this.getGender() == null ? other.getGender() == null : this.getGender().equals(other.getGender()))
             && (this.getUserPassword() == null ? other.getUserPassword() == null : this.getUserPassword().equals(other.getUserPassword()))
-            && (this.getPhone() == null ? other.getPhone() == null : this.getPhone().equals(other.getPhone()))
+            && (this.getContactInfo() == null ? other.getContactInfo() == null : this.getContactInfo().equals(other.getContactInfo()))
             && (this.getEmail() == null ? other.getEmail() == null : this.getEmail().equals(other.getEmail()))
             && (this.getUserProfile() == null ? other.getUserProfile() == null : this.getUserProfile().equals(other.getUserProfile()))
             && (this.getTagNames() == null ? other.getTagNames() == null : this.getTagNames().equals(other.getTagNames()))
+            && (this.getFriendIds() == null ? other.getFriendIds() == null : this.getFriendIds().equals(other.getFriendIds()))
             && (this.getUserStatus() == null ? other.getUserStatus() == null : this.getUserStatus().equals(other.getUserStatus()))
             && (this.getUserRole() == null ? other.getUserRole() == null : this.getUserRole().equals(other.getUserRole()))
             && (this.getCreateTime() == null ? other.getCreateTime() == null : this.getCreateTime().equals(other.getCreateTime()))
@@ -132,10 +139,11 @@ public class User implements Serializable {
         result = prime * result + ((getAvatarUrl() == null) ? 0 : getAvatarUrl().hashCode());
         result = prime * result + ((getGender() == null) ? 0 : getGender().hashCode());
         result = prime * result + ((getUserPassword() == null) ? 0 : getUserPassword().hashCode());
-        result = prime * result + ((getPhone() == null) ? 0 : getPhone().hashCode());
+        result = prime * result + ((getContactInfo() == null) ? 0 : getContactInfo().hashCode());
         result = prime * result + ((getEmail() == null) ? 0 : getEmail().hashCode());
         result = prime * result + ((getUserProfile() == null) ? 0 : getUserProfile().hashCode());
         result = prime * result + ((getTagNames() == null) ? 0 : getTagNames().hashCode());
+        result = prime * result + ((getFriendIds() == null) ? 0 : getFriendIds().hashCode());
         result = prime * result + ((getUserStatus() == null) ? 0 : getUserStatus().hashCode());
         result = prime * result + ((getUserRole() == null) ? 0 : getUserRole().hashCode());
         result = prime * result + ((getCreateTime() == null) ? 0 : getCreateTime().hashCode());
@@ -156,10 +164,11 @@ public class User implements Serializable {
         sb.append(", avatarUrl=").append(avatarUrl);
         sb.append(", gender=").append(gender);
         sb.append(", userPassword=").append(userPassword);
-        sb.append(", phone=").append(phone);
+        sb.append(", contactInfo=").append(contactInfo);
         sb.append(", email=").append(email);
         sb.append(", userProfile=").append(userProfile);
         sb.append(", tagNames=").append(tagNames);
+        sb.append(", friendIds=").append(friendIds);
         sb.append(", userStatus=").append(userStatus);
         sb.append(", userRole=").append(userRole);
         sb.append(", createTime=").append(createTime);

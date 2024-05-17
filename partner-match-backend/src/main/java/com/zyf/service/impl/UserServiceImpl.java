@@ -18,7 +18,6 @@ import com.zyf.utils.AlgorithmUtils;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
-import io.minio.errors.*;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -196,10 +195,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         safetyUser.setUserAccount(user.getUserAccount());
         safetyUser.setAvatarUrl(user.getAvatarUrl());
         safetyUser.setGender(user.getGender());
-        safetyUser.setPhone(user.getPhone());
+        safetyUser.setContactInfo(user.getContactInfo());
         safetyUser.setEmail(user.getEmail());
         safetyUser.setUserProfile(user.getUserProfile());
         safetyUser.setTagNames(user.getTagNames());
+        safetyUser.setFriendIds(user.getFriendIds());
         safetyUser.setUserStatus(user.getUserStatus());
         safetyUser.setUserRole(user.getUserRole());
         safetyUser.setCreateTime(user.getCreateTime());
@@ -424,6 +424,85 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
 
         return true;
+    }
+
+    @Override
+    public Boolean makeFriends(User loginUser, Long friendId) {
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        User user = this.getById(friendId);
+        if (user == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+
+        // 1. 为当前登录的用户添加好友
+        String oldFriendIds = loginUser.getFriendIds();
+        Gson gson = new Gson();
+        List<Long> friendIdList = gson.fromJson(oldFriendIds, new TypeToken<List<Long>>() {
+        }.getType());
+        if (friendIdList == null) {
+            friendIdList = new ArrayList<>();
+        }
+        friendIdList.add(user.getId());
+        String friendIds  = gson.toJson(friendIdList);
+        UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.set("friend_ids", friendIds);
+        updateWrapper.eq("id", loginUser.getId());
+        boolean result = this.update(updateWrapper);
+        if (!result) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+        }
+
+        // 2. 为对方添加好友
+        oldFriendIds = user.getFriendIds();
+        friendIdList = gson.fromJson(oldFriendIds, new TypeToken<List<Long>>() {
+        }.getType());
+        if (friendIdList == null) {
+            friendIdList = new ArrayList<>();
+        }
+        friendIdList.add(loginUser.getId());
+        friendIds  = gson.toJson(friendIdList);
+        updateWrapper = new UpdateWrapper<>();
+        updateWrapper.set("friend_ids", friendIds);
+        updateWrapper.eq("id", user.getId());
+        return this.update(updateWrapper);
+    }
+
+    @Override
+    public Boolean removeUserFriend(User loginUser, Long friendId) {
+        // 1. 为当前用户删除好友
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        User user = this.getById(friendId);
+        if (user == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        String oldFriendIds = loginUser.getFriendIds();
+        Gson gson = new Gson();
+        List<Long> friendIdList = gson.fromJson(oldFriendIds, new TypeToken<List<Long>>() {
+        }.getType());
+        friendIdList.remove(user.getId());
+        String friendIds  = gson.toJson(friendIdList);
+        UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.set("friend_ids", friendIds);
+        updateWrapper.eq("id", loginUser.getId());
+        boolean result = this.update(updateWrapper);
+        if (!result) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+        }
+
+        // 2. 为对方删除好友
+        oldFriendIds = user.getFriendIds();
+        friendIdList = gson.fromJson(oldFriendIds, new TypeToken<List<Long>>() {
+        }.getType());
+        friendIdList.remove(loginUser.getId());
+        friendIds  = gson.toJson(friendIdList);
+        updateWrapper = new UpdateWrapper<>();
+        updateWrapper.set("friend_ids", friendIds);
+        updateWrapper.eq("id", user.getId());
+        return this.update(updateWrapper);
     }
 
     /**

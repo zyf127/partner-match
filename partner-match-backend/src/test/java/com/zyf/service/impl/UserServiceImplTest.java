@@ -24,7 +24,7 @@ class UserServiceImplTest {
         user.setAvatarUrl("http://123.com");
         user.setGender(0);
         user.setUserPassword("12345678");
-        user.setPhone("18765432311");
+        user.setContactInfo("1876543");
         user.setEmail("123@qq.com");
         user.setUserStatus(0);
         user.setTagNames("[\"Java\", \"C++\", \"Vue\"]");
