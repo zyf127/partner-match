@@ -15,6 +15,7 @@
     <van-cell title="队伍描述" :value="team.teamDescription"/>
     <van-cell title="队伍人数" :value="team.userList.length + '/' + team.maxNum"/>
     <van-cell title="队长" :value="team.userList[0].username"/>
+    <van-cell title="队伍聊天" is-link value="点击进入" @click="joinTeamChat"/>
     <van-divider :style="{ color: '#1989fa', borderColor: '#1989fa', padding: '0 16px' }">队员</van-divider>
     <UserCardList :user-list="team.userList"/>
   </div>
@@ -22,7 +23,7 @@
 
 <script setup lang="ts">
 //@ts-nocheck
-import {useRoute} from "vue-router";
+import {useRoute, useRouter} from "vue-router";
 import {TeamType} from "../models/team";
 import {onMounted, ref} from "vue";
 import myAxios from "../plugins/myAxios";
@@ -33,6 +34,7 @@ import {avatarBaseURL} from "../constants/avatar.ts";
 const route = useRoute();
 const teamId = route.query.teamId;
 let team = ref<TeamType>({})
+const router = useRouter();
 
 onMounted(async () => {
   const res = await myAxios.get('/team/get', {
@@ -51,6 +53,17 @@ onMounted(async () => {
     showFailToast('查看失败');
   }
 })
+
+const joinTeamChat = () => {
+  const teamName = team.value.teamName;
+  router.push({
+    path: '/chat/team',
+    query: {
+      teamId,
+      teamName,
+    }
+  });
+}
 
 </script>
 

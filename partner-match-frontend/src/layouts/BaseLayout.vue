@@ -11,7 +11,7 @@
     </template>
   </van-nav-bar>
   <div id="content">
-    <router-view />
+    <router-view/>
   </div>
   <van-tabbar v-model="active" @change="change">
     <van-tabbar-item replace to="/" name="index">
@@ -26,10 +26,16 @@
         <img :src="props.active ? activeTeam : inactiveTeam"/>
       </template>
     </van-tabbar-item>
-    <van-tabbar-item replace to="/chat" name="chat">
+    <van-tabbar-item replace to="/chat/public" name="chat">
       <span>聊天室</span>
       <template #icon="props">
         <img :src="props.active ? activeChat : inactiveChat"/>
+      </template>
+    </van-tabbar-item>
+    <van-tabbar-item replace to="/friends" name="friends">
+      <span>好友</span>
+      <template #icon="props">
+        <img :src="props.active ? activeFriends : inactiveFriends"/>
       </template>
     </van-tabbar-item>
     <van-tabbar-item replace to="/user" name="user">
@@ -42,7 +48,7 @@
 </template>
 
 <script setup>
-  import {ref, onMounted} from "vue";
+  import {ref, onMounted } from "vue";
   import {useRouter} from "vue-router";
   import {routes} from "../router/index.ts";
   import activeIndex from "../assets/icon/activeIndex.png"
@@ -53,6 +59,9 @@
   import inactiveChat from "../assets/icon/inactiveChat.png"
   import activeUser from "../assets/icon/activeUser.png"
   import inactiveUser from "../assets/icon/inactiveUser.png"
+  import activeFriends from "../assets/icon/activeFriends.png"
+  import inactiveFriends from "../assets/icon/inactiveFriends.png"
+
 
   const router = useRouter()
 
@@ -62,7 +71,7 @@
   const active = ref('index');
 
   onMounted(() => {
-    const newActive = localStorage.getItem("active");
+    const newActive = sessionStorage.getItem('active')
     if (newActive) {
       active.value = newActive;
     }
@@ -86,13 +95,16 @@
   const onClickRight = () => router.push('/search');
 
   const change = () => {
-    localStorage.setItem('active', active.value);
+    sessionStorage.setItem('active', active.value);
   }
 </script>
 
 <style scoped>
   #content {
     padding-top: 45px;
+    /* 开发 */
     padding-bottom: 55px;
+    /* 上线 */
+    /*padding-bottom: 83px;*/
   }
 </style>

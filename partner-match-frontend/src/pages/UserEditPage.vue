@@ -1,7 +1,6 @@
 <template>
   <van-form @submit="onSubmit" style="margin-top: 20px;">
     <van-cell-group inset>
-
       <div v-if="editInfo.editKey === 'gender'" style="display: flex; justify-content: center;">
         <van-radio-group v-model="editInfo.currentValue" direction="horizontal">
           <van-radio name="1">男</van-radio>
@@ -10,6 +9,8 @@
       </div>
       <template v-if="editInfo.editKey !== 'gender'">
         <van-field
+            type="textarea"
+            autosize
             v-model="editInfo.currentValue"
             :name="editInfo.editKey"
             :label="editInfo.editName"

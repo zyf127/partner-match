@@ -7,10 +7,11 @@ export type UserType = {
     userAccount: string;
     avatarUrl: string;
     gender:number;
-    phone: string;
+    contactInfo: string;
     email: string;
     userProfile: string;
-    tagNames: string[];
+    tagNames: string;
+    friendIds: string;
     userStatus: number;
     userRole: number;
     createTime: Date;

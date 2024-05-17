@@ -8,7 +8,7 @@ export const getCurrentUser = async () => {
     if (res.code === 0) {
         return res.data;
     } else {
-        showFailToast('用户未登录');
+        showFailToast('请先登录');
         router.push('/user/login');
     }
 };

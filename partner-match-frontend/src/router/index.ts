@@ -10,7 +10,11 @@ import TeamAddPage from "../pages/TeamAddPage.vue";
 import TeamDetailPage from "../pages/TeamDetailPage.vue";
 import TeamUpdatePage from "../pages/TeamUpdatePage.vue";
 import UserRegisterPage from "../pages/UserRegisterPage.vue";
-import ChatPage from "../pages/ChatPage.vue";
+import PublicChatPage from "../pages/PublicChatPage.vue";
+import UserDetailPage from "../pages/UserDetailPage.vue";
+import FriendsPage from "../pages/FriendsPage.vue";
+import TeamChatPage from "../pages/TeamChatPage.vue";
+import PrivateChatPage from "../pages/PrivateChatPage.vue";
 
 export const routes = [
     {path: '/', title:'伙伴匹配', component: Index},
@@ -21,10 +25,14 @@ export const routes = [
     {path: '/user/login', title:'登录', component: UserLoginPage},
     {path: '/user/list', title:'搜索结果', component: SearchResultPage},
     {path: '/user/edit', title:'编辑信息', component: UserEditPage},
+    {path: '/user/detail', title: '查看详情', component: UserDetailPage},
     {path: '/team/add', title:'创建队伍', component: TeamAddPage},
     {path: '/team/detail', title:'队伍详情', component: TeamDetailPage},
     {path: '/team/update', title:'更新队伍', component: TeamUpdatePage},
-    {path: '/chat', title: '聊天', component: ChatPage}
+    {path: '/chat/public', title: '世界聊天', component: PublicChatPage},
+    {path: '/chat/team', title: '队伍聊天', component: TeamChatPage},
+    {path: '/chat/private', title: '私聊', component: PrivateChatPage},
+    {path: '/friends', title: '好友', component: FriendsPage},
 ]
 
 const router = VueRouter.createRouter({

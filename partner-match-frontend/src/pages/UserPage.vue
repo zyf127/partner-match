@@ -16,9 +16,10 @@
     </div>
     <van-cell title="昵称" is-link :value="user.username" @click="toEdit('username', '昵称', user.username)"/>
     <van-cell title="账号" :value="user.userAccount"/>
-    <van-cell title="性别" is-link :value="user.gender === 0 ? '女' : '男'" @click="toEdit('gender', '性别', user.gender)"/>
-    <van-cell title="手机号" is-link :value="getSafetyPhone(user.phone)" @click="toEdit('phone', '手机号', user.phone)"/>
-    <van-cell title="邮箱" is-link :value="getSafeEmail(user.email)" @click="toEdit('email', '邮箱', user.email)"/>
+    <van-cell title="性别" is-link :value="user.gender != null ? (user.gender === 0 ? '女' : '男') : '未知'" @click="toEdit('gender', '性别', user.gender)"/>
+    <van-cell title="联系方式" is-link :value="user.contactInfo" @click="toEdit('contactInfo', '联系方式', user.contactInfo)"/>
+    <van-cell title="邮箱" is-link :value="user.email" @click="toEdit('email', '邮箱', user.email)"/>
+    <van-cell title="个人简介" is-link :value="user.userProfile" @click="toEdit('userProfile', '个人简介', user.userProfile)"/>
     <van-cell title="我的标签" is-link value="点击查看" @click="showMyTags"/>
     <van-cell title="注册时间" :value="formatDateTime(user.createTime)"/>
     <div style="padding: 10px;">
@@ -64,34 +65,6 @@
       location.reload();
     } else {
       showFailToast('退出登录失败');
-    }
-  }
-
-  const getSafetyPhone = (s: string) => {
-    if (s) {
-      let charArray = s.split('');
-      for (let i = 0; i < s.length; i++) {
-        if (i >= 3 && i <= 6) {
-          charArray[i] = '*';
-        }
-      }
-      return charArray.join('');
-    }
-  }
-
-  const getSafeEmail = (s: string) => {
-    if (s) {
-      let charArray = s.split('');
-      let i;
-      for (i = 0; i < s.length; i++) {
-        if (charArray[i] === '@') {
-          break;
-        }
-      }
-      for (let j =  Math.floor(i / 2); j < i; j++) {
-        charArray[j] = '*';
-      }
-      return charArray.join('');
     }
   }
 

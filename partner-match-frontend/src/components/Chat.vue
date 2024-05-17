@@ -1,6 +1,6 @@
 <template>
   <div class="chat-container" ref="scrollContainer">
-    <div class="content" v-for="chatMessage in chatRoomMessage">
+    <div class="content" v-for="chatMessage in chatMessages">
       <div class="message self" v-if="chatMessage.fromUser.id === currentUser.id">
         <div class="myInfo info">
           <img :alt="chatMessage.fromUser.username" class="avatar"
@@ -40,7 +40,7 @@
 
 <script setup lang="ts">
 
-import {onMounted, ref, nextTick} from 'vue';
+import {onMounted, ref, nextTick, defineProps} from 'vue';
 import defaultUserAvatar from '../assets/avatar/defaultUserAvatar.jpg'
 import {getCurrentUser} from "../services/user.ts";
 import {ChatMessageType} from "../models/chat-message";
@@ -50,11 +50,13 @@ import {formatDateTime} from "../services/datetime.ts";
 import myAxios from "../plugins/myAxios";
 import {showFailToast} from "vant";
 
+const {userId, teamId} = defineProps(['userId', 'teamId']);
+
 // 创建 WebSocket 对象
-const ws = new WebSocket('ws://localhost:8080/api/chat');
+const ws = new WebSocket(`ws://localhost:8080/api/chat/${userId}/${teamId}`);
 const currentUser: any = ref({});
 const inputMessage = ref('');
-const chatRoomMessage = ref<ChatMessageType[]>([]);
+const chatMessages = ref<ChatMessageType[]>([]);
 // 使用 ref 获取滚动容器的 DOM 元素
 const scrollContainer: any = ref(null);
 
@@ -78,7 +80,7 @@ ws.onmessage = function(event) {
   console.log('Received message:', event.data);
   if (event.data) {
     const newMessage: ChatMessageType = JSON.parse(event.data);
-    chatRoomMessage.value.push(newMessage);
+    chatMessages.value.push(newMessage);
     scrollToBottom();
   }
 };
@@ -100,14 +102,44 @@ const scrollToBottom = () => {
 
 onMounted(async () => {
   currentUser.value = await getCurrentUser();
-  const res = await myAxios.get('/chatMessage/getAll');
-  if (res['code'] === 0) {
-    chatRoomMessage.value = res.data;
-    await nextTick(() => {
-      scrollToBottom();
+  if (userId === -1 && teamId === -1) {
+    const res = await myAxios.get('/chatMessage/get/public');
+    if (res['code'] === 0) {
+      chatMessages.value = res.data;
+      await nextTick(() => {
+        scrollToBottom();
+      });
+    } else {
+      showFailToast("加载聊天记录失败");
+    }
+  } else if (userId === -1 && teamId !== -1) {
+    const res = await myAxios.get('/chatMessage/get/team', {
+      params: {
+        teamId: teamId
+      }
     });
-  } else {
-    showFailToast("加载聊天记录失败");
+    if (res['code'] === 0) {
+      chatMessages.value = res.data;
+      await nextTick(() => {
+        scrollToBottom();
+      });
+    } else {
+      showFailToast("加载聊天记录失败");
+    }
+  } else if (userId !== -1 && teamId === -1) {
+    const res = await myAxios.get('/chatMessage/get/private', {
+      params: {
+        friendId: userId
+      }
+    });
+    if (res['code'] === 0) {
+      chatMessages.value = res.data;
+      await nextTick(() => {
+        scrollToBottom();
+      });
+    } else {
+      showFailToast("加载聊天记录失败");
+    }
   }
 });
 
@@ -201,7 +233,10 @@ onMounted(async () => {
   padding: 10px;
   border-top: 1px solid #ccc;
   position: fixed;
+  /* 开发 */
   bottom: 48px;
+  /* 上线 */
+  /*bottom: 76px;*/
   left: 0;
   width: 95%;
   background-color: #fffffe;
