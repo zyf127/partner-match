@@ -82,7 +82,7 @@ const loadData = async () => {
   if (!isMatchMode.value) {
     const res = await myAxios.get(`/user/recommend`, {
       params: {
-        pageSize: 8,
+        pageSize: 30,
         pageNum: 1
       }
     });
@@ -97,7 +97,7 @@ const loadData = async () => {
       showFailToast('推荐用户失败');
     }
   } else {
-    const num = 8;
+    const num = 30;
     const res = await myAxios.get(`/user/match`, {
       params: {
         num
