@@ -261,7 +261,7 @@ public class UserController {
      */
     @GetMapping("/match")
     public BaseResponse<List<User>> matchUsers(long num, HttpServletRequest request) {
-        if (num < 1 || num > 20) {
+        if (num < 1 || num > 30) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "匹配数量不符合要求");
         }
         User loginUser = userService.getLoginUser(request);

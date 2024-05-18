@@ -73,6 +73,15 @@ public interface UserService extends IService<User> {
     int updateUser(User user, User loginUser);
 
     /**
+     * 获取随机的用户列表
+     *
+     * @param id 登录用户的 id
+     * @param size 用户列表的大小
+     * @return 用户列表
+     */
+    List<User> getRandomUserList(Long id, Long size);
+
+    /**
      * 推荐用户
      *
      * @param pageSize 页面大小

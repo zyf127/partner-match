@@ -2,7 +2,6 @@ package com.zyf.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -18,7 +17,7 @@ import com.zyf.utils.AlgorithmUtils;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
-import javafx.util.Pair;
+import com.zyf.common.MyPair;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -251,7 +250,31 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     @Override
+    public List<User> getRandomUserList(Long id, Long size) {
+        int userCount = this.count();
+        Random random = new Random();
+        List<User> userList = new ArrayList<>();
+        Set<Integer> generatedIds = new HashSet<>();
+
+        while (userList.size() < size) {
+            int randomNum = random.nextInt(userCount) + 1;
+            if (generatedIds.contains(randomNum)) {
+                continue;
+            }
+            generatedIds.add(randomNum);
+            User user = this.getById(randomNum);
+            if (user != null && user.getId() != id) {
+                userList.add(user);
+            }
+        }
+        return userList;
+    }
+
+    @Override
     public List<User> recommendUsers(long pageSize, long pageNum, User loginUser) {
+        if (pageSize < 1 || pageSize > 30) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "推荐数量不符合要求");
+        }
         String redisKey = null;
         if (loginUser != null && loginUser.getId() != null) {
             redisKey = String.format("partner-match:user:recommend:%s", loginUser.getId());
@@ -260,23 +283,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
         ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
         // 如果有缓存，直接读缓存
-        Page<User> userPage = (Page<User>) valueOperations.get(redisKey);
-        if (userPage == null) {
-           // 如果没有缓存，查数据库
+        List<User> userList = (List<User>) valueOperations.get(redisKey);
+        if (userList == null) {
+            // 如果没有缓存，查数据库
             if (loginUser == null) {
-                userPage = this.page(new Page<>(pageNum, pageSize));
+                userList = this.getRandomUserList(-1L, pageSize);
             } else {
-                QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-                queryWrapper.ne("id", loginUser.getId());
-                userPage = this.page(new Page<>(pageNum, pageSize), queryWrapper);
+                userList = this.getRandomUserList(loginUser.getId(), pageSize);
             }
         }
         try {
-            valueOperations.set(redisKey, userPage, 30000, TimeUnit.MILLISECONDS);
+            valueOperations.set(redisKey, userList, 30000, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             log.error("redis set key error");
         }
-        List<User> userList = userPage.getRecords();
         return userList.stream().map((user) -> this.getSafetyUser(user)).collect(Collectors.toList());
     }
 
@@ -333,7 +353,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             List<User> userList = this.list(queryWrapper);
 
             // 3. 筛选出标签最相似的 num 个 用户
-            PriorityQueue<Pair<Long, Integer>> priorityQueue = new PriorityQueue<>((int)num, (p1, p2) -> p2.getValue() - p1.getValue());
+            PriorityQueue<MyPair<Long, Integer>> priorityQueue = new PriorityQueue<>((int)num, (p1, p2) -> p2.getValue() - p1.getValue());
             for (int i = 0; i < userList.size(); i++) {
                 User user = userList.get(i);
                 String tagNames = user.getTagNames();
@@ -344,11 +364,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
                 List<String> tempTagList = tagList.stream().filter(tag -> !loginUserTagList.contains(tag)).collect(Collectors.toList());
                 int similarity = AlgorithmUtils.minDistance(tempLoginUserTagList, tempTagList);
                 if (priorityQueue.size() < num) {
-                    priorityQueue.add(new Pair<>(user.getId(), similarity));
+                    priorityQueue.add(new MyPair<>(user.getId(), similarity));
                 } else {
                     if (similarity < priorityQueue.peek().getValue()) {
                         priorityQueue.poll();
-                        priorityQueue.add(new Pair<>(user.getId(), similarity));
+                        priorityQueue.add(new MyPair<>(user.getId(), similarity));
                     }
                 }
             }

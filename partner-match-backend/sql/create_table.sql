@@ -1,3 +1,7 @@
+create database if not exists partner_match;
+
+use partner_match;
+
 -- 用户表
 create table user
 (
@@ -20,7 +24,6 @@ create table user
     is_delete     tinyint  default 0                 not null comment '是否删除'
 )
     comment '用户';
-
 
 
 -- 标签表
@@ -80,6 +83,7 @@ create table user_team
 
     comment '用户队伍关系';
 
+
 -- 聊天消息表
 create table chat_message
 (
@@ -95,6 +99,7 @@ create table chat_message
     is_delete       tinyint  default 0                 not null comment '是否删除'
 )
     comment '聊天消息';
+
 
 -- 好友申请表
 create table friendship
