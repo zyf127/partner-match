@@ -47,7 +47,7 @@ import {showConfirmDialog, showFailToast, showSuccessToast} from "vant";
 import myAxios from "../plugins/myAxios";
 import {getCurrentUser} from "../services/user.ts";
 import {avatarBaseURL} from "../constants/avatar.ts";
-import defaultUserAvatar from "../assets/avatar/defaultUserAvatar.jpg";
+import defaultUserAvatar from "../assets/avatar/defaultUserAvatar.png";
 // @ts-ignore
 import qs from "qs";
 

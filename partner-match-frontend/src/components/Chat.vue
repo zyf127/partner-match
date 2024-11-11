@@ -3,24 +3,24 @@
     <div class="content" v-for="chatMessage in chatMessages">
       <div class="message self" v-if="chatMessage.fromUser.id === currentUser.id">
         <div class="myInfo info">
-          <img :alt="chatMessage.fromUser.username" class="avatar"
+          <img @click="toUser" :alt="chatMessage.fromUser.username" class="avatar"
                :src="chatMessage.fromUser.avatarUrl != null ? `${avatarBaseURL}${chatMessage.fromUser.avatarUrl}` : defaultUserAvatar">
         </div>
         <div class="myMessage">
           <span
-              class="username">{{ formatDateTime(chatMessage.createTime.toString()) }}&nbsp;&nbsp;&nbsp;&nbsp;{{ chatMessage.fromUser.username.length < 10 ? chatMessage.fromUser.username : chatMessage.fromUser.username.slice(0, 10) }}</span>
+              class="username">{{ formatDateTime(chatMessage.createTime) }}&nbsp;&nbsp;&nbsp;&nbsp;{{ chatMessage.fromUser.username.length < 10 ? chatMessage.fromUser.username : chatMessage.fromUser.username.slice(0, 10) }}</span>
           <div>
             <p class="text">{{ chatMessage.messageContent }}</p>
           </div>
         </div>
       </div>
       <div class="message other" v-else>
-        <img :alt="chatMessage.fromUser.username" class="avatar"
+        <img @click="toUserDetail(chatMessage.fromUser.id)" :alt="chatMessage.fromUser.username" class="avatar"
              :src="chatMessage.fromUser.avatarUrl != null ? `${avatarBaseURL}${chatMessage.fromUser.avatarUrl}` : defaultUserAvatar">
         <div class="info">
           <span class="username">{{
               chatMessage.fromUser.username.length < 10 ? chatMessage.fromUser.username : chatMessage.fromUser.username.slice(0, 10)
-            }}&nbsp;&nbsp;&nbsp;&nbsp;{{ formatDateTime(chatMessage.createTime.toString()) }}</span>
+            }}&nbsp;&nbsp;&nbsp;&nbsp;{{ formatDateTime(chatMessage.createTime) }}</span>
           <p class="text">{{ chatMessage.messageContent }}</p>
         </div>
       </div>
@@ -40,29 +40,35 @@
 
 <script setup lang="ts">
 
+// @ts-nocheck
 import {onMounted, ref, nextTick, defineProps} from 'vue';
-import defaultUserAvatar from '../assets/avatar/defaultUserAvatar.jpg'
+import defaultUserAvatar from '../assets/avatar/defaultUserAvatar.png'
 import {getCurrentUser} from "../services/user.ts";
 import {ChatMessageType} from "../models/chat-message";
 import {avatarBaseURL} from "../constants/avatar.ts";
 import {formatDateTime} from "../services/datetime.ts";
-// @ts-ignore
 import myAxios from "../plugins/myAxios";
 import {showFailToast} from "vant";
+import {useRouter} from "vue-router";
 
 const {userId, teamId} = defineProps(['userId', 'teamId']);
 
+const isDev = process.env.NODE_ENV === 'development';
+
+const WS_BASE_URL = isDev ? 'ws://localhost:8080' : 'ws://zhiyouge.top:8080';
+
 // 创建 WebSocket 对象
-const ws = new WebSocket(`ws://localhost:8080/api/chat/${userId}/${teamId}`);
+const ws = new WebSocket(`${WS_BASE_URL}/api/chat/${userId}/${teamId}`);
 const currentUser: any = ref({});
 const inputMessage = ref('');
 const chatMessages = ref<ChatMessageType[]>([]);
 // 使用 ref 获取滚动容器的 DOM 元素
 const scrollContainer: any = ref(null);
+const router = useRouter();
 
 // 建立 WebSocket 连接时调用
 ws.onopen = function(event) {
-  console.log('WebSocket connection opened:', event);
+  // console.log('WebSocket connection opened:', event);
 };
 
 // 发送消息到服务端
@@ -77,7 +83,7 @@ const sendMessage = () => {
 
 // 接收到来自服务端的消息时调用
 ws.onmessage = function(event) {
-  console.log('Received message:', event.data);
+  // console.log('Received message:', event.data);
   if (event.data) {
     const newMessage: ChatMessageType = JSON.parse(event.data);
     chatMessages.value.push(newMessage);
@@ -87,7 +93,7 @@ ws.onmessage = function(event) {
 
 // 断开 WebSocket 连接时调用
 ws.onclose = function(event) {
-  console.log('WebSocket connection closed:', event);
+  // console.log('WebSocket connection closed:', event);
 };
 
 // 滚动容器到底部的方法
@@ -142,6 +148,19 @@ onMounted(async () => {
     }
   }
 });
+
+const toUser = () => {
+  router.push('/user');
+}
+
+const toUserDetail = (userId) => {
+  router.push({
+    path: '/user/detail',
+    query: {
+      userId
+    }
+  });
+}
 
 </script>
 

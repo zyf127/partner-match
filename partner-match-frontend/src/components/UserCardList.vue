@@ -27,7 +27,7 @@
 <script setup lang="ts">
   //@ts-nocheck
   import {UserType} from "../models/user";
-  import defaultUserAvatar from "../assets/avatar/defaultUserAvatar.jpg"
+  import defaultUserAvatar from "../assets/avatar/defaultUserAvatar.png"
   import {avatarBaseURL} from "../constants/avatar.ts";
   import {useRouter} from "vue-router";
 

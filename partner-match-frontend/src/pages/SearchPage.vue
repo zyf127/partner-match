@@ -27,7 +27,7 @@
       :items="tagItems"
   />
   <div style="padding: 12px">
-    <van-button v-if="myTagNames" block type="primary" @click="doSearchResult">修改</van-button>
+    <van-button v-if="userId" block type="primary" @click="doSearchResult">修改</van-button>
     <van-button v-else block type="primary" @click="doSearchResult">搜索</van-button>
   </div>
 </template>
@@ -41,6 +41,7 @@
   const router = useRouter();
   const route = useRoute();
   let myTagNames = route.query.myTagNameList;
+  const userId = route.query.userId;
   let tagList = [];
   const activeTagNameList = ref([]);
   const activeIndex = ref(0);
@@ -93,7 +94,7 @@
 
   const doSearchResult = async () => {
     const selectedTagNameList = activeTagNameList.value;
-    if (myTagNames) {
+    if (userId) {
       myTagNames = activeTagNameList.value;
       const res = await myAxios.post('/user/update/tagNames', {
         tagNames: JSON.stringify(myTagNames)

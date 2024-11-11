@@ -1,14 +1,12 @@
 // 创建实例时配置默认值
 import axios from "axios";
 
-const baseURL = import.meta.env.VITE_APP_API_BASEURL;
+const isDev = process.env.NODE_ENV === 'development';
 
 const myAxios = axios.create({
-    baseURL: baseURL
+    baseURL: isDev ? 'http://localhost:8080/api' : 'http://zhiyouge.top/api',
+    withCredentials: true
 });
-
-// 进行跨域请求时能够携带跨域请求中的凭据信息
-myAxios.defaults.withCredentials = true;
 
 // 添加请求拦截器
 myAxios.interceptors.request.use(function (config) {
@@ -21,7 +19,6 @@ myAxios.interceptors.request.use(function (config) {
 
 // 添加响应拦截器
 myAxios.interceptors.response.use(function (response) {
-    console.log('我收到你的响应啦', response.data);
     // 对响应数据做点什么
     return response.data;
 }, function (error) {

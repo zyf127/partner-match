@@ -3,7 +3,7 @@
     <div style="text-align: center; padding: 20px;">
       <van-uploader
           :before-read="beforeRead" :after-read="afterRead" :max-count="1"
-          :max-size="5 * 1024 * 1024" @oversize="onOversize">
+          :max-size="10 * 1024 * 1024" @oversize="onOversize">
         <van-image
             style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);"
             width="125px"
@@ -13,6 +13,7 @@
             fit="cover"
         />
       </van-uploader>
+      <van-loading class="loading" type="spinner" color="#1989fa" v-if="isUpload"/>
     </div>
     <van-cell title="昵称" is-link :value="user.username" @click="toEdit('username', '昵称', user.username)"/>
     <van-cell title="账号" :value="user.userAccount"/>
@@ -36,11 +37,12 @@
   // @ts-ignore
   import myAxios from "../plugins/myAxios";
   import {showFailToast, showSuccessToast} from "vant";
-  import defaultUserAvatar from "../assets/avatar/defaultUserAvatar.jpg"
+  import defaultUserAvatar from "../assets/avatar/defaultUserAvatar.png"
   import {avatarBaseURL} from "../constants/avatar.ts";
 
   const router = useRouter();
   const user = ref();
+  const isUpload = ref(false);
 
   onMounted(async () => {
     const currentUser = await getCurrentUser();
@@ -62,10 +64,10 @@
     const res = await myAxios.post('/user/logout');
     if (res['code'] === 0) {
       showSuccessToast('退出登录成功');
-      location.reload();
     } else {
       showFailToast('退出登录失败');
     }
+    user.value = await getCurrentUser();
   }
 
   const showMyTags = () => {
@@ -88,18 +90,20 @@
 
 
   const afterRead = async (file: any) => {
+    isUpload.value = true;
     const formData = new FormData();
     formData.append('avatarFile', file.file);
     const res = await myAxios.post('/user/avatar', formData);
     if (res.code === 0) {
-      location.reload();
+      user.value = await getCurrentUser();
     } else {
       showFailToast('更换头像失败');
     }
+    isUpload.value = false;
   }
 
   const onOversize = () => {
-    showFailToast('头像大小不能超过 5MB');
+    showFailToast('头像大小不能超过 10MB');
   }
 </script>
 

@@ -67,7 +67,7 @@ const onSubmit = async () => {
     showSuccessToast('注册成功');
     setTimeout(() => {
       router.push('/user');
-    }, 2000);
+    }, 1000);
   } else {
     showFailToast('注册失败');
   }

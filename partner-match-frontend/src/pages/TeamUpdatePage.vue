@@ -3,7 +3,7 @@
     <div style="text-align: center; padding: 20px;">
       <van-uploader
           :before-read="beforeRead" :after-read="afterRead" :max-count="1"
-          :max-size="5 * 1024 * 1024" @oversize="onOversize" image-fit="fill">
+          :max-size="10 * 1024 * 1024" @oversize="onOversize" image-fit="fill">
         <van-image
             style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);"
             width="125px"
@@ -13,6 +13,7 @@
             :src="teamData.avatarUrl != null ? `${avatarBaseURL}${teamData.avatarUrl}` : defaultTeamAvatar"
         />
       </van-uploader>
+      <van-loading class="loading" type="spinner" color="#1989fa" v-if="isUpload"/>
     </div>
     <van-form @submit="onSubmit">
       <van-cell-group inset>
@@ -104,8 +105,13 @@ const expireDate = ref(['', '', '']);
 const expireTime = ref(['', '']);
 const showPicker = ref(false);
 const showDateTime = ref('');
+const isUpload = ref(false);
 
 onMounted(async () => {
+  await load();
+})
+
+const load = async () => {
   const res = await myAxios.get('/team/get', {
     params: {
       teamId
@@ -119,7 +125,7 @@ onMounted(async () => {
     showFailToast('加载失败');
     router.back();
   }
-})
+}
 
 const onConfirm = () => {
   teamData.value.expireTime =  `${expireDate.value.join('-')} ${expireTime.value.join(':')}`;
@@ -153,19 +159,21 @@ const beforeRead = (file: any) => {
 };
 
 const afterRead = async (file: any) => {
+  isUpload.value = true;
   const formData = new FormData();
   formData.append('avatarFile', file.file);
   formData.append('teamId', teamId);
   const res = await myAxios.post('/team/avatar', formData);
   if (res.code === 0) {
-    location.reload();
+    load();
   } else {
     showFailToast('更换头像失败');
   }
+  isUpload.value = false;
 }
 
 const onOversize = () => {
-  showFailToast('头像大小不能超过 5MB');
+  showFailToast('头像大小不能超过 10MB');
 }
 </script>
 
