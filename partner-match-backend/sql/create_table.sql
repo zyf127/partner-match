@@ -1,6 +1,7 @@
-create database if not exists partner_match;
-
+create schema partner_match collate utf8mb4_general_ci;
+ALTER DATABASE partner_match CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 use partner_match;
+
 
 -- 用户表
 create table user
@@ -23,7 +24,7 @@ create table user
     update_time   datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment '更新时间',
     is_delete     tinyint  default 0                 not null comment '是否删除'
 )
-    comment '用户';
+    comment '用户' charset = utf8mb4;
 
 
 -- 标签表
@@ -41,7 +42,7 @@ create table tag
     constraint unique_index_tag_name
         unique (tag_name) comment '基于 tag_name 创建的唯一索引'
 )
-    comment '标签';
+    comment '标签' charset = utf8mb4;
 
 create index index_user_id
     on tag (user_id)
@@ -65,7 +66,7 @@ create table team
     update_time      datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment '更新时间',
     is_delete        tinyint  default 0                 not null comment '是否删除'
 )
-    comment '队伍';
+    comment '队伍' charset = utf8mb4;
 
 
 -- 用户队伍关系表
@@ -81,7 +82,7 @@ create table user_team
     is_delete tinyint default 0 not null comment '是否删除'
 )
 
-    comment '用户队伍关系';
+    comment '用户队伍关系' charset = utf8mb4;
 
 
 -- 聊天消息表
@@ -98,7 +99,7 @@ create table chat_message
     update_time     datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment '更新时间',
     is_delete       tinyint  default 0                 not null comment '是否删除'
 )
-    comment '聊天消息';
+    comment '聊天消息' charset = utf8mb4;
 
 
 -- 好友申请表
@@ -108,11 +109,11 @@ create table friendship
         primary key,
     from_id         bigint                             not null comment '发送申请的用户 id',
     to_id           bigint                             not null comment '接收申请的用户 id ',
-    request_status  tinyint  default 0                 not null comment '申请状态 默认 0 （0-待处理 1-已同意 2-已拒绝）',
-    request_message varchar(256)                       null comment '好友申请验证信息',
+    friendship_status  tinyint  default 0                 not null comment '申请状态 默认 0 （0-待处理 1-已同意 2-已拒绝）',
+    friendship_message varchar(256)                       null comment '好友申请验证信息',
     create_time     datetime default CURRENT_TIMESTAMP null comment '创建时间',
     update_time     datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment '更新时间',
     is_delete       tinyint  default 0                 not null comment '是否删除'
 )
-    comment '好友申请表';
+    comment '好友申请表' charset = utf8mb4;
 

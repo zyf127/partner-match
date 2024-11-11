@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/chatMessage")
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"}, allowCredentials = "true")
 public class ChatMessageController {
 
     /**
@@ -52,8 +51,9 @@ public class ChatMessageController {
         List<ChatMessage> chatMessageList = chatMessageService.list(queryWrapper);
         List<ChatMessageVO> chatMessageVOList = chatMessageList.stream().map((chatMessage -> {
             User user = userService.getById(chatMessage.getFromId());
+            User safetyUser = userService.getSafetyUser(user);
             ChatMessageVO chatMessageVO = new ChatMessageVO();
-            chatMessageVO.setFromUser(user);
+            chatMessageVO.setFromUser(safetyUser);
             BeanUtils.copyProperties(chatMessage, chatMessageVO);
             return chatMessageVO;
         })).collect(Collectors.toList());
@@ -72,8 +72,9 @@ public class ChatMessageController {
         List<ChatMessage> chatMessageList = chatMessageService.list(queryWrapper);
         List<ChatMessageVO> chatMessageVOList = chatMessageList.stream().map((chatMessage -> {
             User user = userService.getById(chatMessage.getFromId());
+            User safetyUser = userService.getSafetyUser(user);
             ChatMessageVO chatMessageVO = new ChatMessageVO();
-            chatMessageVO.setFromUser(user);
+            chatMessageVO.setFromUser(safetyUser);
             BeanUtils.copyProperties(chatMessage, chatMessageVO);
             return chatMessageVO;
         })).collect(Collectors.toList());
@@ -97,8 +98,9 @@ public class ChatMessageController {
         List<ChatMessage> chatMessageList = chatMessageService.list(queryWrapper);
         List<ChatMessageVO> chatMessageVOList = chatMessageList.stream().map((chatMessage -> {
             User user = userService.getById(chatMessage.getFromId());
+            User safetyUser = userService.getSafetyUser(user);
             ChatMessageVO chatMessageVO = new ChatMessageVO();
-            chatMessageVO.setFromUser(user);
+            chatMessageVO.setFromUser(safetyUser);
             BeanUtils.copyProperties(chatMessage, chatMessageVO);
             return chatMessageVO;
         })).collect(Collectors.toList());

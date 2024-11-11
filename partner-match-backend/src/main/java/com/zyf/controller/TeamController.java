@@ -28,7 +28,6 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/team")
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"}, allowCredentials = "true")
 public class TeamController {
     /**
      * 用户服务
@@ -195,7 +194,7 @@ public class TeamController {
      * @return 是否更换成功
      */
     @PostMapping("/avatar")
-    public BaseResponse<Boolean> updateUserAvatar(@RequestParam("avatarFile") MultipartFile avatarFile, @RequestParam("teamId") Long teamId, HttpServletRequest request) {
+    public BaseResponse<Boolean> updateTeamAvatar(@RequestParam("avatarFile") MultipartFile avatarFile, @RequestParam("teamId") Long teamId, HttpServletRequest request) {
         if (avatarFile == null || teamId == null || teamId <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }

@@ -1,5 +1,6 @@
 package com.zyf.service.impl;
 
+import cn.hutool.core.util.DesensitizedUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -194,7 +195,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         safetyUser.setUserAccount(user.getUserAccount());
         safetyUser.setAvatarUrl(user.getAvatarUrl());
         safetyUser.setGender(user.getGender());
-        safetyUser.setContactInfo(user.getContactInfo());
+        safetyUser.setContactInfo(DesensitizedUtil.mobilePhone(user.getContactInfo()));
         safetyUser.setEmail(user.getEmail());
         safetyUser.setUserProfile(user.getUserProfile());
         safetyUser.setTagNames(user.getTagNames());
@@ -256,14 +257,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         List<User> userList = new ArrayList<>();
         Set<Integer> generatedIds = new HashSet<>();
 
-        while (userList.size() < size) {
+        for (int i = 0; i < size; i++) {
             int randomNum = random.nextInt(userCount) + 1;
             if (generatedIds.contains(randomNum)) {
                 continue;
             }
             generatedIds.add(randomNum);
             User user = this.getById(randomNum);
-            if (user != null && user.getId() != id) {
+            if (user != null && !user.getId().equals(id)) {
                 userList.add(user);
             }
         }
@@ -324,7 +325,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     @Override
     public List<User> matchUsers(long num, User loginUser) {
         // 1. 条件判断
-        if (num < 1 || num > 20) {
+        if (num < 1 || num > 30) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "匹配数量不符合要求");
         }
         if (loginUser == null) {

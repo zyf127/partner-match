@@ -39,11 +39,6 @@ public class ChatMessageEndpoint {
     private static final Map<String, ConcurrentHashMap<Long, Session>> onlineUsers = new HashMap<>();
 
     /**
-     * 上线的用户
-     */
-//    private static final Map<Long, Session> onlineUsers = new ConcurrentHashMap<>();
-
-    /**
      * 当前登录的用户
      */
     private User loginUser;
@@ -170,6 +165,7 @@ public class ChatMessageEndpoint {
         }
         ChatMessage totalChatMessage = chatMessageService.getById(chatMessage.getId());
         ChatMessageVO chatMessageVO = new ChatMessageVO();
+        loginUser = userService.getById(loginUser.getId());
         chatMessageVO.setFromUser(userService.getSafetyUser(loginUser));
         BeanUtils.copyProperties(totalChatMessage, chatMessageVO);
         broadcastToUsers(chatMessageVO);
