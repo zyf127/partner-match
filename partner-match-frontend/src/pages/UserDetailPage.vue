@@ -31,7 +31,7 @@
       <van-button type="primary" block disabled>TA 向您发送了好友申请</van-button>
     </div>
     <div style="padding: 10px;" v-else-if="status === 3">
-      <van-button type="primary" block @click="">与 TA 聊天</van-button>
+      <van-button type="primary" block @click="joinPrivateChat(user.id, user.username)">与 TA 聊天</van-button>
     </div>
     <van-dialog v-model:show="show" title="备注信息" show-cancel-button @confirm="sendFriendshipPost" @cancel="show = false">
       <van-field
@@ -45,12 +45,12 @@
 
 <script setup lang="ts">
 import {onMounted, ref} from "vue";
-import {useRoute} from "vue-router";
+import {useRoute, useRouter} from "vue-router";
 import {getCurrentUser} from "../services/user.ts";
 // @ts-ignore
 import myAxios from "../plugins/myAxios";
 import {showFailToast, showSuccessToast} from "vant";
-import defaultUserAvatar from "../assets/avatar/defaultUserAvatar.jpg"
+import defaultUserAvatar from "../assets/avatar/defaultUserAvatar.png"
 import {avatarBaseURL} from "../constants/avatar.ts";
 
 const user: any = ref({});
@@ -58,6 +58,7 @@ const currentUser: any = ref({});
 const route = useRoute();
 const show = ref(false);
 const friendshipMessage = ref('');
+const router = useRouter();
 
 let status = ref(0);
 
@@ -80,7 +81,7 @@ onMounted(async () => {
   // 判断是否已经是好友
   const friendIds = currentUser.value.friendIds;
   const friendIdList = JSON.parse(friendIds);
-  if (friendIdList && friendIdList > 0) {
+  if (friendIdList && friendIdList.length > 0) {
     friendIdList.forEach((friendId: any) => {
       if (friendId === user.value.id) {
         status.value = 3;
@@ -131,9 +132,20 @@ const sendFriendshipPost = async () => {
   });
   if (res['code'] === 0) {
     showSuccessToast('等待对方接受');
+    status.value = 1;
   } else {
-      showFailToast('好友申请失败');
+    showFailToast('好友申请失败');
   }
+}
+
+const joinPrivateChat = (userId: number, username: string) => {
+  router.push({
+    path: '/chat/private',
+    query: {
+      userId,
+      username,
+    }
+  });
 }
 </script>
 
