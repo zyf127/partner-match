@@ -1,6 +1,8 @@
 package com.zyf.service.impl;
 
 import cn.hutool.core.util.DesensitizedUtil;
+import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -251,23 +253,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Override
     public List<User> getRandomUserList(Long id, Long size) {
-        int userCount = this.count();
-        Random random = new Random();
-        List<User> userList = new ArrayList<>();
-        Set<Integer> generatedIds = new HashSet<>();
-
-        for (int i = 0; i < size; i++) {
-            int randomNum = random.nextInt(userCount) + 1;
-            if (generatedIds.contains(randomNum)) {
-                continue;
-            }
-            generatedIds.add(randomNum);
-            User user = this.getById(randomNum);
-            if (user != null && !user.getId().equals(id)) {
-                userList.add(user);
-            }
-        }
-        return userList;
+        return userMapper.selectRandomUserList(id, size);
     }
 
     @Override
@@ -283,8 +269,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
         ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
         // 如果有缓存，直接读缓存
-        List<User> userList = (List<User>) valueOperations.get(redisKey);
-        if (userList == null) {
+        List<User> userList = JSONUtil.toList((String)valueOperations.get(redisKey), User.class) ;
+        if (userList == null || userList.isEmpty()) {
             // 如果没有缓存，查数据库
             if (loginUser == null) {
                 userList = this.getRandomUserList(-1L, pageSize);
@@ -293,7 +279,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             }
         }
         try {
-            valueOperations.set(redisKey, userList, 30000, TimeUnit.MILLISECONDS);
+            valueOperations.set(redisKey, JSONUtil.toJsonStr(userList), 30000, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             log.error("redis set key error");
         }
@@ -334,8 +320,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         String redisKey = String.format("partner-match:user:match:%s", loginUserId);
         ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
         // 如果有缓存，直接读缓存
-        List<User> finalUserList = (List<User>) valueOperations.get(redisKey);
-        if (finalUserList == null) {
+        List<User> finalUserList = JSONUtil.toList((String)valueOperations.get(redisKey), User.class) ;
+        if (finalUserList == null || finalUserList.isEmpty()) {
             // 如果没有缓存，查数据库
             String loginUserTagNames = loginUser.getTagNames();
             if (loginUserTagNames == null) {
@@ -389,7 +375,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             }
         }
         try {
-            valueOperations.set(redisKey, finalUserList, 30000, TimeUnit.MILLISECONDS);
+            valueOperations.set(redisKey, JSONUtil.toJsonStr(finalUserList), 30000, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             log.error("redis set key error");
         }

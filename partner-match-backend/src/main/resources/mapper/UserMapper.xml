@@ -50,4 +50,19 @@
         ORDER BY
             ut.id ASC
     </select>
+
+    <select id="selectRandomUserList" resultMap="BaseResultMap">
+        select
+                id, username, user_account, avatar_url, gender, user_password, contact_info, email,
+                user_profile, tag_names, friend_ids, user_status, user_role, create_time, update_time, is_delete
+        from
+            user
+        where
+            id != #{id}
+        order by
+            rand()
+        limit
+            #{size}
+    </select>
+
 </mapper>
