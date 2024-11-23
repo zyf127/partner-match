@@ -109,8 +109,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
         // 昵称和账号不能重复
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("username", username);
-        queryWrapper.eq("user_account", userAccount);
+        queryWrapper.eq("username", username).or().eq("user_account", userAccount);
         int count = userMapper.selectCount(queryWrapper);
         if (count > 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "昵称或账号重复");
