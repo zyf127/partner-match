@@ -35,8 +35,8 @@ build/
 ### script ###
 /src/main/java/com/zyf/script/
 
-### .yml ###
-*.yml
+### application-prod.yml ###
+application-prod.yml
 
 ### avatar ###
 /avatar/

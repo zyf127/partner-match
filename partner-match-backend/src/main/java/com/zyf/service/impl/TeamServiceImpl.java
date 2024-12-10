@@ -25,6 +25,7 @@ import com.zyf.service.UserTeamService;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -45,6 +46,7 @@ import java.util.concurrent.TimeUnit;
  *
 * @author zyf
 */
+@Slf4j
 @Service
 public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     implements TeamService{
@@ -293,7 +295,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             while (count++ < 10) {
                 // 只有一个线程能获取到锁
                 if (rLock.tryLock(0, -1, TimeUnit.MILLISECONDS)) {
-                    System.out.println("getLock: " + Thread.currentThread().getId());
+                    log.info("getLock: " + Thread.currentThread().getId());
                     // 2. 不能加入自己的队伍，不能重复加入已加入的队伍（幂等性）
                     QueryWrapper<UserTeam> queryWrapper = new QueryWrapper<>();
                     queryWrapper.eq("user_id", loginUser.getId());
@@ -342,13 +344,13 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
                 }
             }
         } catch (InterruptedException e) {
-            log.error("doCacheRecommendUsers error", e);
+            log.error("joinTeam error", e);
             return false;
         } finally {
             // 只能释放自己的锁
             if (rLock.isHeldByCurrentThread()) {
                 rLock.unlock();
-                System.out.println("unlock: " + Thread.currentThread().getId());
+                log.info("unlock: " + Thread.currentThread().getId());
             }
         }
         return false;
@@ -392,7 +394,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             this.removeById(teamId);
         } else {
             // 如果队伍剩下至少两人，判断当前登录的用户是不是队长
-            if (team.getUserId() == userId) {
+            if (team.getUserId().equals(userId)) {
                 // 如果是队长退出队伍，权限转移给第二早加入的用户
                 userTeamQueryWrapper = new QueryWrapper<>();
                 userTeamQueryWrapper.eq("team_id", teamId);
@@ -438,7 +440,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         }
 
         // 3. 当前用户是否为队长
-        if (team.getUserId() != loginUser.getId()) {
+        if (!team.getUserId().equals(loginUser.getId())) {
             throw new BusinessException(ErrorCode.NO_AUTH, "没有解散队伍的权限");
         }
 
