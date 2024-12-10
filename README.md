@@ -17,7 +17,7 @@ Vite 脚手架
 
 Vant UI 组件库
 ### 后端
-SpringBoot
+Spring Boot
 
 MyBatis
 
