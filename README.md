@@ -60,9 +60,10 @@ Swagger
 打包：
 `npm run build`
 ### 后端
-运行 sql 目录下的 create_table.sql 建表、insert_data.sql 插入标签数据
 
-修改 application.yml 中的数据库配置、Redis配置、MinIO配置
+修改 application-dev.yml 中的数据库配置、Redis 配置，修改 application.yml 中的 MinIO 配置
+
+运行 sql 目录下的 create_table.sql 建表、insert_data.sql 插入标签数据
 
 运行项目
 ## 界面展示
