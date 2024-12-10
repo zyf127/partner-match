@@ -1,5 +1,10 @@
 # 挚友阁 - 寻找志同道合的朋友
 ### 在线访问地址：[挚友阁](http://zhiyouge.top) 
+账号可以自行注册，也可以使用以下账号直接登录：
+
+账号：`guest`
+
+密码：`12345678`
 ## 项目介绍
 基于 Vue + Spring Boot 的移动端交友网站（适配手机浏览器），实现了用户注册登录、按标签检索用户、推荐相似用户、组队、头像上传、添加好友、消息聊天等功能。
 ## 技术栈
@@ -51,14 +56,11 @@ Swagger
 使用 Knife4j + Swagger 自动生成后端接口文档，避免了人工编写维护文档的麻烦。
 ## 快速启动
 ### 前端
-安装依赖：
-`npm run install`
+安装依赖：`npm run install`
 
-运行：
-`npm run dev`
+运行：`npm run dev`
 
-打包：
-`npm run build`
+打包：`npm run build`
 ### 后端
 
 修改 application-dev.yml 中的数据库配置、Redis 配置，修改 application.yml 中的 MinIO 配置
