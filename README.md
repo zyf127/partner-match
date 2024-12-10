@@ -13,13 +13,13 @@
 ### 前端
 Vue
 
-Vant UI 组件库
-
 Vite 脚手架
 
 TypeScript
 
 Axios
+
+Vant UI 组件库
 ### 后端
 SpringBoot
 
